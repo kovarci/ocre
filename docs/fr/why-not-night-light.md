@@ -2,47 +2,47 @@
 
 [← Ocre](../../README.fr.md#documentation) · [English](../en/why-not-night-light.md)
 
-C'etait l'intention de depart, et elle a echoue pour une raison qui merite
-d'etre documentee, parce qu'elle invalide tous les outils existants sur les
-builds recents.
+C'était l'intention de départ, et elle a échoué pour une raison qui mérite
+d'être documentée, parce qu'elle invalide tous les outils existants sur les
+builds récents.
 
-Le Night Light n'a pas d'API. Son reglage est persiste dans deux valeurs
+Le Night Light n'a pas d'API. Son réglage est persisté dans deux valeurs
 `REG_BINARY` sous `HKEY_CURRENT_USER`, au format **Microsoft Bond
-CompactBinary v1** encapsule dans une enveloppe **CloudStore**. Toute la
-litterature communautaire affirme qu'ecrire ces valeurs applique le reglage
-immediatement.
+CompactBinary v1** encapsulé dans une enveloppe **CloudStore**. Toute la
+littérature communautaire affirme qu'écrire ces valeurs applique le réglage
+immédiatement.
 
 **Ce n'est plus vrai depuis Windows 11 25H2 (build 26200).** Mesures faites
 sur un Acer Aspire 14 AI, 25H2 build 26200.9168 :
 
-| Observation | Consequence |
+| Observation | Conséquence |
 |---|---|
-| Le codec de ce depot produit **exactement les memes octets** que Windows pour une meme temperature | le format est correctement compris |
-| Les Parametres relisent bien la valeur ecrite (le curseur suit) | l'ecriture aboutit |
-| Le rendu a l'ecran, lui, ne bouge pas | le moteur ne relit pas le registre |
-| « Turn off now » n'ecrit **meme pas** la cle d'etat | l'etat vivant n'est plus dans CloudStore |
+| Le codec de ce dépôt produit **exactement les mêmes octets** que Windows pour une même température | le format est correctement compris |
+| Les Paramètres relisent bien la valeur écrite (le curseur suit) | l'écriture aboutit |
+| Le rendu à l'écran, lui, ne bouge pas | le moteur ne relit pas le registre |
+| « Turn off now » n'écrit **même pas** la clé d'état | l'état vivant n'est plus dans CloudStore |
 
-Ont ete essayes sans succes : ecriture de la temperature seule, reecriture de
-la cle d'etat avec horodatage frais, cycle extinction/rallumage avec des delais
-de 120 ms a 2,5 s, et le drapeau « reglage en cours » (champ 70) que
-l'interface leve pendant qu'on fait glisser le curseur.
+Ont été essayés sans succès : écriture de la température seule, réécriture de
+la clé d'état avec horodatage frais, cycle extinction/rallumage avec des délais
+de 120 ms à 2,5 s, et le drapeau « réglage en cours » (champ 70) que
+l'interface lève pendant qu'on fait glisser le curseur.
 
-Conclusion : sur ces builds, le registre est un vestige de persistance, relu a
+Conclusion : sur ces builds, le registre est un vestige de persistance, relu à
 l'ouverture de session et plus jamais ensuite.
 
-Contre-epreuve dans l'autre sens, en allumant puis en eteignant le Night
-Light a la main depuis les reglages rapides, en surveillant les cles :
+Contre-épreuve dans l'autre sens, en allumant puis en éteignant le Night
+Light à la main depuis les réglages rapides, en surveillant les clés :
 
-| Cle | Contenu | Ecrite |
+| Clé | Contenu | Écrite |
 |---|---|---|
-| `Store\...\Cloud\...state` | un horodatage seul, pas d'etat | a chaque basculement |
-| `Store\...\Current\...state` | « force ON » date de deux jours plus tot | touchee au basculement, **contenu inchange** |
-| `Store\...\Current\...settings` | horaire, temperature | jamais |
+| `Store\...\Cloud\...state` | un horodatage seul, pas d'état | à chaque basculement |
+| `Store\...\Current\...state` | « force ON » daté de deux jours plus tôt | touchée au basculement, **contenu inchangé** |
+| `Store\...\Current\...settings` | horaire, température | jamais |
 
 Windows note donc *qu'il y a eu* un basculement, pas *lequel*. C'est
-pourquoi Ocre ne sait pas voir un Night Light allume a la main (voir
+pourquoi Ocre ne sait pas voir un Night Light allumé à la main (voir
 [le bandeau](settings.md#quand-un-filtre-de-windows-se-cumule)).
 
-Le codec reste dans [`recherche/`](../../recherche/) : il est correct, teste, et
-permet toujours de **preregler** le Night Light pour la prochaine ouverture de
+Le codec reste dans [`recherche/`](../../recherche/) : il est correct, testé, et
+permet toujours de **prérégler** le Night Light pour la prochaine ouverture de
 session.

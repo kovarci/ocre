@@ -30,9 +30,9 @@ Ocre.exe /help          the list
 one for the other teaches nobody anything. The English words are accepted
 too: `warmer`, `cooler`, `brightness`, `schedule`, `darkroom`.
 
-`/get` writes one `key=value` per line -- intensite, kelvin, luminosite,
+`/get` writes one `key=value` per line — intensite, kelvin, luminosite,
 coupe, horaire, gris, noir, unite, portable, fichier, separes, and one line per
-screen when they are separated -- which a script reads effortlessly, and
+screen when they are separated — which a script reads effortlessly, and
 returns the intensity as exit code for whoever only wants that. Ocre.exe is a
 windowed application, not a console one: `cmd` and PowerShell do not wait for
 it, the output shows up after the prompt, and the exit code lands neither in
@@ -41,21 +41,21 @@ Ocre.exe /get` in `cmd`, and in PowerShell `$p = Start-Process .\Ocre.exe /get
 -Wait -PassThru -NoNewWindow; $p.ExitCode`.
 
 `/export` and `/import` are the settings window's buttons, taken from the
-command line -- to roll the same settings out to several machines. A path
+command line — to roll the same settings out to several machines. A path
 does not fit in a message: both work on the file themselves, and `/import`
 then tells the running instance that everything changed, language included.
 A relative path is relative to the folder the command is run from. A file
 without an `[ocre]` section is refused, code 2.
 
-A command that expects a number and gets none -- `/set` on its own, `/set
-abc` -- **does nothing and says so**, exit code 2. It used to be worth zero,
+A command that expects a number and gets none — `/set` on its own, `/set
+abc` — **does nothing and says so**, exit code 2. It used to be worth zero,
 and zero switches the filter off: a badly written macro turned the screen off
 in silence.
 
 A command addressed to a live instance is **posted** to it, not applied on
 the spot: two processes each setting their own ramp would fight. Broadcasting
 avoids having to find the window, which is hidden. That is also why
-`#SingleInstance Force` is gone -- it would have killed the application to
+`#SingleInstance Force` is gone — it would have killed the application to
 relaunch it on every command, which gives the right result by the worst
 route. The question "am I the first?" is asked of a named mutex.
 
@@ -94,7 +94,7 @@ or gets closed by reflex. Both are truncated beyond forty lines.
 
 An `ocre.ini` placed **next to `Ocre.exe`** takes precedence over the one in
 `%APPDATA%`, and the logs join it: the application then travels on a USB
-stick or in a synced folder with its settings. The file must exist -- even
-empty -- for the mode to engage; it is a choice you make by creating it, not
+stick or in a synced folder with its settings. The file must exist — even
+empty — for the mode to engage; it is a choice you make by creating it, not
 a behaviour that kicks in on its own. `Ocre.exe /get` says which file is in
 use.

@@ -5,7 +5,7 @@
 ## The installer
 
 The easy way: `Ocre-<version>-setup.exe`, from the GitHub Releases. One
-double-click, a wizard, and Ocre installs like any other application -- in
+double-click, a wizard, and Ocre installs like any other application — in
 Program Files, with a Start menu shortcut, an entry in Settings > Apps to
 remove it, and, optionally, launch at sign-in. It sets `GdiIcmGammaRange`
 (that HKLM key is why it asks for elevation) and turns off `Win+Ctrl+C` (see
@@ -28,8 +28,8 @@ Before touching Windows, the installer records what it is about to change, in
 `C:\Program Files\Ocre\sauvegarde\`:
 
 - `avant-installation.reg`: the original registry values
-  (`GdiIcmGammaRange`, `HotkeyEnabled`). Double-click it -- or use the Start
-  menu shortcut "Ocre - restore the original Windows settings" -- and Windows
+  (`GdiIcmGammaRange`, `HotkeyEnabled`). Double-click it — or use the Start
+  menu shortcut "Ocre - restore the original Windows settings" — and Windows
   is back to how it was, Ocre installed or not. A value that did not exist
   reads `"name"=-`: it is deleted.
 - `avant-installation.ini`: the same, for the uninstaller.
@@ -38,8 +38,8 @@ It works value by value, never a whole key: exporting a key would also
 overwrite what you have changed since. The recorded state is the one from
 **before the first install**; an update does not rewrite it.
 
-Uninstalling gives back only what the install really changed -- if
-`GdiIcmGammaRange` was already 256 it leaves it alone -- and only if the value
+Uninstalling gives back only what the install really changed — if
+`GdiIcmGammaRange` was already 256 it leaves it alone — and only if the value
 is still the one the install set: what another tool has set since is not
 Ocre's to touch. The `sauvegarde\` folder goes with the rest.
 `tools/test-installateur.ps1` plays all of it (install, update, uninstall,
@@ -48,8 +48,8 @@ four starting states) without elevation, on dummy keys.
 
 ## Without the installer
 
-Two ways: the `Ocre-<version>.zip` archive from the GitHub Releases -- the
-executable, `install.ps1` and the licences, nothing to build --, or the whole
+Two ways: the `Ocre-<version>.zip` archive from the GitHub Releases — the
+executable, `install.ps1` and the licences, nothing to build —, or the whole
 repository, where `install.ps1` builds the executable if it is missing
 (AutoHotkey v2 and its compiler are fetched as needed). Either way, from the
 unzipped or cloned folder:
@@ -99,7 +99,7 @@ application; `-Test` runs the tests.
 On first launch on someone else's machine, Windows shows "Windows protected
 your PC". That is not Ocre: it is the fate of any **unsigned** executable
 SmartScreen has never heard of, and a compiled AutoHotkey exe gets it more
-than most -- some antivirus products even quarantine it, the interpreter
+than most — some antivirus products even quarantine it, the interpreter
 having served enough bad purposes. *More info > Run anyway* gets past it.
 
 The proper answer is a **code signature**. `tools/sign.ps1` signs `Ocre.exe`
@@ -107,7 +107,11 @@ The proper answer is a **code signature**. `tools/sign.ps1` signs `Ocre.exe`
 store or in a PFX, and `install.ps1 -Build` calls it on its own when it
 finds one. The certificate itself is not made here:
 [SignPath Foundation](https://signpath.org) signs open-source projects for
-free from their GitHub repository, Azure Trusted Signing costs a few euros a
-month after identity verification, a classic OV certificate about two
-hundred euros a year. `-SelfSigned` makes a test one that convinces nobody
+free from their GitHub repository — provided the project has the verifiable
+reputation they ask for, and builds from GitHub Actions (see the *Code signing
+policy* in the README); Microsoft's Artifact Signing (formerly Trusted Signing)
+costs a few euros a month after identity verification, but is, as far as we
+know, open only to organisations in the US, Canada, the EU and the UK and to
+individuals in the US and Canada — check Microsoft's page; a classic OV
+certificate about two hundred euros a year. `-SelfSigned` makes a test one that convinces nobody
 but verifies the chain.

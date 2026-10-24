@@ -27,10 +27,10 @@ the intensity too.
 A **left click** on the icon opens the settings; a **right click** opens a
 small panel where intensity, brightness and three presets are within reach
 without opening anything; a **middle click** turns the filter off or back on
--- Ctrl+F7 for whoever has a hand on the mouse. The interface is in French
+— Ctrl+F7 for whoever has a hand on the mouse. The interface is in French
 and English.
 
-Intensity is shown in **percent or Kelvin** -- 3400 K means something to
+Intensity is shown in **percent or Kelvin** — 3400 K means something to
 anyone coming from f.lux or Night Light, 58 % means nothing. A click on the
 value at the top of the right-click panel switches between the two; it is the
 only place where this is chosen. Only the display changes: the slider, the
@@ -39,5 +39,5 @@ shortcuts and the configuration file still count in percent.
 Inside the windows, the **arrow keys** adjust the focused slider, `Tab` moves
 to the next one, `Home` and `End` go to the ends, `Escape` closes.
 
-Everything can also be driven from the command line -- `Ocre.exe /set 40`,
-`/kelvin 3400`, `/preset night`, `/get` -- for a button box or a macro.
+Everything can also be driven from the command line — `Ocre.exe /set 40`,
+`/kelvin 3400`, `/preset night`, `/get` — for a button box or a macro.

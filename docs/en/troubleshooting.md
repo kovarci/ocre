@@ -40,7 +40,7 @@ soon as it switches off, the grey shows.
 It turns on because Windows gives it a shortcut, `Win+Ctrl+C`, active by
 default. The firmware of these same laptops injecting a Win key into `Fn+F7`
 combinations, Ocre's toggle fires both at once. `install.ps1` disables that
-shortcut -- the filter itself stays available in Settings for whoever uses
+shortcut — the filter itself stays available in Settings for whoever uses
 it. By hand:
 
 ```
@@ -54,18 +54,18 @@ On an OLED screen a black pixel is off, and a very dark grey pixel is on.
 Yet almost no application writes black: Notion's and Discord's dark mode is
 `#191919` (level 25 of 255), VS Code's `#1E1E1E` (30), Spotify's `#121212`
 (18). On a panel that can do true black, all of that is a uniform grey
-glow -- and the screen's infinite contrast goes to waste.
+glow — and the screen's infinite contrast goes to waste.
 
 The **True black (OLED)** toggle in the settings sends every level at or
 below a threshold to pure black, and stretches what is above so that white
 stays white. It is the same gamma ramp as the filter, hence the same
 mechanism, changes nothing in the applications, and it **follows the filter**
-like grey does: `Ctrl+F7` takes it away with the tint, as a fade -- the
-threshold goes down step by step with the intensity -- and brings it back
+like grey does: `Ctrl+F7` takes it away with the tint, as a fade — the
+threshold goes down step by step with the intensity — and brings it back
 with it. Notion, Discord, VS
 Code, the terminal and Explorer turn black at once, everywhere. The
 threshold moves in steps of 4, from 4 to 64; 28 by default, which catches
-Notion and Discord (25) and spares VS Code (30) -- 32 catches them all.
+Notion and Discord (25) and spares VS Code (30) — 32 catches them all.
 Each extra step crushes the shadows of photos and films a little more: that
 is the price, and it shows from 40 on. In HDR, where the ramp is ignored,
 the same operation goes through the compositor's matrix, with the threshold
@@ -82,12 +82,12 @@ Some people read in the evening in grey **and** warm: grey removes the colour
 that catches the eye, warm removes the blue that keeps you awake. A *Turn the
 screen greyscale along with the filter* toggle makes grey follow the filter:
 on as soon as Ocre is, off with it. A single command sets both states, and
-that is what keeps them from drifting apart -- the original problem.
+that is what keeps them from drifting apart — the original problem.
 
 Driving the Windows filter was tried and dropped, measurements in hand. Its
 `Active` key is not re-read live: once written, it changes nothing before the
 next toggle in Settings. Its shortcut goes through `atbroker.exe`, which
-refuses as soon as the shortcut is disabled -- and it must be disabled, that
+refuses as soon as the shortcut is disabled — and it must be disabled, that
 is the previous paragraph.
 
 Ocre therefore sets **its own** grey, through the Magnification API
@@ -98,7 +98,7 @@ It is instant, registry-free, and **the effect belongs to the process**: an
 have stayed.
 
 One trap, which cost an hour and deserves to be written down. `DllCall` loads
-a DLL, calls, then **unloads** it if nothing else holds it -- that is
+a DLL, calls, then **unloads** it if nothing else holds it — that is
 documented. `MagInitialize` ran, the library was released along with its
 state, and the next call landed on a pristine library:
 `ERROR_INVALID_FUNCTION`, with no further explanation, while the same call

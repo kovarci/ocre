@@ -39,8 +39,8 @@ screen. That is inherent to the method.
 affects the primary screen: on a two-screen machine, the external monitor
 would stay blue while the laptop turns ochre. Ocre therefore enumerates the
 displays attached to the desktop with `EnumDisplayDevices`, opens one context
-per screen and sets the same ramp on each. A screen that refuses it -- some
-external monitors have no gamma table -- does not deprive the others of the
+per screen and sets the same ramp on each. A screen that refuses it — some
+external monitors have no gamma table — does not deprive the others of the
 filter.
 
 The contexts stay open from one write to the next: reopening them on every
@@ -58,14 +58,14 @@ It **only appears when there is something to choose**. On a single-screen
 machine the question has no object, and a pointless toggle steals height
 from a window that has none left. Plug in a second screen, reopen the
 settings: the section is there, with a selector naming each monitor. Unplug
-it, it goes away -- the setting stays written and becomes active again at the
+it, it goes away — the setting stays written and becomes active again at the
 next connection.
 
 Once separated, a shortcut has to apply somewhere, and the two gestures do
 not mean the same thing: **on the keyboard** you adjust the screen of the
 active window, the one you are looking at; **with the wheel** the one it
 hovers, since the hand is already there. The badge follows, and shows on the
-screen concerned rather than always on the primary -- an answer that appears
+screen concerned rather than always on the primary — an answer that appears
 behind you is no answer.
 
 Recognising a screen from one session to the next needs a stable identifier.
@@ -80,7 +80,7 @@ with connections.
 The ramp can also darken: a factor applied identically to the three channels,
 so without shifting the hue. On a laptop it is a good method, because it
 takes the screen **below the backlight minimum**, which the hardware cannot
-do -- useful at night, when the lowest brightness is still too much.
+do — useful at night, when the lowest brightness is still too much.
 
 On a desktop monitor it is the wrong one. The backlight stays at full and we
 only crush the levels: black stops being black, contrast collapses. That is
@@ -99,7 +99,7 @@ The two complement each other instead of competing:
 
 Two mechanisms depending on the screen, with nothing in common. **DDC/CI**
 (`dxva2.dll`) talks to the monitor over the video cable: it is the only way
-for an external screen, and it is slow -- around fifty milliseconds per
+for an external screen, and it is slow — around fifty milliseconds per
 write, where the wheel would ask for several dozen per second. Writes are
 therefore batched over 120 ms, as the configuration file writes already
 are. **WMI** (`WmiMonitorBrightnessMethods`) drives a laptop's built-in
@@ -108,7 +108,7 @@ value found at startup is recorded and restored on exit, exactly like the
 ramp.
 
 The hardware floor is not the advertised minimum but a tenth of the range
-above it. On many panels, zero switches the backlight off outright -- and a
+above it. On many panels, zero switches the backlight off outright — and a
 black screen takes with it the control that would let you come back up. The
 remaining tenth is rendered by the ramp, which itself never goes below 0.30
 for the same reason.
@@ -116,8 +116,8 @@ for the same reason.
 The laptop's Fn keys and the Windows slider write the same value as Ocre. So
 Ocre reads it back, every ten seconds and before quitting, and compares it to
 what it last set. If it moved, someone else did it: Ocre **adopts** the
-change -- its brightness slider realigns on it instead of overwriting it at
-the next gesture -- and, on exit, only restores the morning's value if its own
+change — its brightness slider realigns on it instead of overwriting it at
+the next gesture — and, on exit, only restores the morning's value if its own
 is still in place. Restoring the morning's value over a setting made by hand
 during the day was a surprise. Two units of tolerance absorb monitors that
 round what they are written, without which 58 read back for 57 written would
@@ -139,13 +139,13 @@ do, without changing anything.
 Two Windows modes ignore the gamma table, for the same reason. In **HDR**,
 Windows composes in 10- or 16-bit floating point and **no longer consults the
 gamma table**: `SetDeviceGammaRamp` succeeds, and does nothing. Ocre would
-set its ramp, the icon would tint, the badge would say "60 %" -- and the
+set its ramp, the icon would tint, the badge would say "60 %" — and the
 screen would stay blue. The worst case for an application of this kind: a
 silent failure.
 
 The ramp multiplies each channel by a coefficient. **A compositor colour
-matrix does exactly the same thing** -- that is the Magnification API, the
-one Windows uses for its accessibility filters -- and the compositor also
+matrix does exactly the same thing** — that is the Magnification API, the
+one Windows uses for its accessibility filters — and the compositor also
 runs in HDR. When a screen is in HDR, the tint therefore goes through this
 matrix ([`lib/Compositeur.ahk`](../../lib/Compositeur.ahk)) instead of the ramp.
 Measured in SDR, both paths give the same result to the digit: a white under
@@ -162,7 +162,7 @@ it has not yet been measured on a lit HDR screen.
 Detection ([`lib/Hdr.ahk`](../../lib/Hdr.ahk)) deserves a word, because the first
 API tried **lies**. `GET_ADVANCED_COLOR_INFO` (Windows 10) reports "advanced
 colour active" for HDR as well as for automatic colour management (ACM),
-which Windows 11 enables on its own on wide-gamut panels -- and which leaves
+which Windows 11 enables on its own on wide-gamut panels — and which leaves
 the ramp intact. On the development machine: flag at 1, HDR off, Ocre works.
 Trusting it would have switched people for whom the ramp works perfectly
 well over to the compositor. `GET_ADVANCED_COLOR_INFO_2` (Windows 11 24H2)
@@ -174,7 +174,7 @@ And WCG, the *automatic colour management* Windows 11 enables on its own on
 wide-gamut panels? The ramp works there. We believed the opposite for a
 while, and switched Ocre to the compositor as soon as WCG was on: the mouse
 cursor, which the compositor's matrix does not touch, stayed white, and the
-tint was weaker than with the ramp -- the compositor composes in linear under
+tint was weaker than with the ramp — the compositor composes in linear under
 WCG without the 2.2 exponent being applied. Measured by eye since: under
 WCG, a (1; 0.3; 0) ramp set with `SetDeviceGammaRamp` tints the screen very
 visibly. `Hdr.RampeIgnoree` therefore only switches in true HDR; in doubt,
@@ -185,12 +185,12 @@ the `voie` key of `ocre.ini` settles it by hand.
 A cousin of f.lux's *Darkroom* mode: the image rendered on the red channel
 only. What is dark stays black, what is light turns red, and the screen only
 emits the light that least disturbs dark-adapted vision. With applications in
-dark mode, that is red text on a black background -- the intended effect,
+dark mode, that is red text on a black background — the intended effect,
 and nothing else.
 
 f.lux also inverts the image. That was designed for white backgrounds, which
 became black; on applications that are already dark, the inversion does the
-opposite of the goal, every black background turning bright red -- and
+opposite of the goal, every black background turning bright red — and
 photos go negative. Ocre does not invert.
 
 It is one more matrix set by the compositor (`Compositeur.CHAMBRE`), and a
