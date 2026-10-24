@@ -1,0 +1,83 @@
+# Verifie chaque changement : les tests qui ne demandent ni ecran ni materiel,
+# la construction de l'exe, celle de l'installateur, et son parcours complet --
+# installation, mise a jour, retour arriere -- sur des cles factices
+# (tools/test-installateur.ps1). La suite complete, qui ouvre les fenetres
+# d'Ocre sur un bureau, tourne en local (tools/test.ps1, tools/release.ps1).
+#
+# Meme chaine d'outils que release.yml : tools/outils-ci.ps1, versions et
+# empreintes epinglees.
+
+name: CI
+
+on:
+  push:
+    branches: ["**"]
+    paths-ignore:
+      - "**.md"
+      - "docs/**"
+      - ".github/ISSUE_TEMPLATE/**"
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  tests:
+    name: Tests, construction, installateur
+    runs-on: windows-latest
+    timeout-minutes: 30
+    steps:
+      - name: Recuperer le depot
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Outils (AutoHotkey, Ahk2Exe, Inno Setup en versions epinglees)
+        shell: pwsh
+        run: ./tools/outils-ci.ps1
+
+      - name: Tests de calcul
+        shell: pwsh
+        run: |
+          $ahk = Join-Path $env:LOCALAPPDATA 'Programs\AutoHotkey\v2\AutoHotkey64.exe'
+          $echecs = @()
+          foreach ($t in 'test-courbe', 'test-soleil', 'test-cli') {
+            Write-Host "::group::$t"
+            $p = Start-Process $ahk -ArgumentList '/ErrorStdOut', "`"$PWD\tools\$t.ahk`"" -Wait -PassThru -NoNewWindow
+            Write-Host '::endgroup::'
+            if ($p.ExitCode -ne 0) { $echecs += "$t (code $($p.ExitCode))" }
+          }
+          if ($echecs) { throw "en echec : $($echecs -join ', ')" }
+
+      - name: Construire Ocre.exe
+        shell: pwsh
+        run: ./install.ps1 -Build -NoStart -NoStartup -NoRegistry
+
+      - name: Verifier Ocre.exe
+        shell: pwsh
+        run: |
+          $v = [regex]::Match((Get-Content Ocre.ahk -Raw), ';@Ahk2Exe-SetVersion\s+([0-9][0-9.]*)').Groups[1].Value
+          $fv = (Get-Item Ocre.exe).VersionInfo.FileVersion
+          if ($fv -notlike "$v*") { throw "l'exe dit la version '$fv', le source dit '$v'" }
+          $texte = [Text.Encoding]::Unicode.GetString([IO.File]::ReadAllBytes('Ocre.exe'))
+          foreach ($nom in 'VILLES', 'INTER') {
+            if ($texte.IndexOf($nom) -lt 0) { throw "ressource $nom absente de l'exe" }
+          }
+          # la ligne de commande de l'exe compile : /version rend la version du source
+          $sortie = (& .\Ocre.exe /version | Out-String).Trim()
+          Write-Host "Ocre.exe /version -> $sortie"
+
+      - name: Archive et installateur
+        shell: pwsh
+        run: |
+          ./tools/archive.ps1
+          ./tools/installer.ps1
+
+      - name: Installation, mise a jour et retour arriere
+        shell: pwsh
+        run: ./tools/test-installateur.ps1
