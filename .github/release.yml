@@ -1,0 +1,25 @@
+# Les notes generees d'une release (gh release create --generate-notes, par
+# release.yml) : classees par etiquette des tickets et pull requests, au lieu
+# d'une liste plate. Le detail d'une version vit dans CHANGELOG.md.
+changelog:
+  exclude:
+    labels:
+      - ignore-for-release
+    authors:
+      - dependabot
+  categories:
+    - title: "New"
+      labels:
+        - enhancement
+    - title: "Fixed"
+      labels:
+        - bug
+    - title: "Documentation"
+      labels:
+        - documentation
+    - title: "Build and release"
+      labels:
+        - dependencies
+    - title: "Other changes"
+      labels:
+        - "*"

@@ -33,6 +33,9 @@ All notable changes to Ocre are listed here. The format follows
 - **Documentation:** the README is now a short front page; the detail lives in `docs/en` and
   `docs/fr`, with screenshots (`tools/captures.ps1` regenerates them). `CONTRIBUTING.md`,
   `SECURITY.md`, `CODE_OF_CONDUCT.md`, issue and pull request templates.
+- Repository hygiene: topics, private vulnerability reporting, Dependabot for the pinned actions,
+  release-note categories (`.github/release.yml`), a social preview image
+  (`tools/social-preview.ps1`).
 - `Ocre.exe` carries its company, copyright and original file name; the GPL v2 text of the
   embedded AutoHotkey interpreter ships with the archive and the installer.
 
