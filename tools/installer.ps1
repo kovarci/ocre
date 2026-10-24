@@ -93,5 +93,8 @@ Ok "$Setup ($([math]::Round((Get-Item $Setup).Length/1MB,2)) Mo)"
 #----------------------------------------------------------------- signature --
 if (-not $Essai) {
     & powershell.exe -NoProfile -ExecutionPolicy Bypass -File (Join-Path $PSScriptRoot 'sign.ps1') -Fichier $Setup
-    if ($LASTEXITCODE -eq 2) { Info "non signe : SmartScreen avertira au premier lancement (voir README, 'SmartScreen')" }
+    if ($LASTEXITCODE -eq 2) {
+        Info "non signe : SmartScreen avertira au premier lancement (voir README, 'SmartScreen')"
+        $global:LASTEXITCODE = 0     # "pas de certificat" n'est pas un echec : voir install.ps1
+    }
 }

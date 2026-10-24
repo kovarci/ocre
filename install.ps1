@@ -203,7 +203,13 @@ if ((Test-Path $Exe) -and -not $Build) {
     # l'utilisateur (voir tools\sign.ps1). Sans certificat, l'exe reste tel
     # quel : SmartScreen le dira, le README explique pourquoi.
     & powershell.exe -NoProfile -ExecutionPolicy Bypass -File (Join-Path $Root 'tools\sign.ps1') -Fichier $Exe
-    if ($LASTEXITCODE -eq 2) { Info "non signe : SmartScreen avertira au premier lancement (voir README, 'SmartScreen')" }
+    if ($LASTEXITCODE -eq 2) {
+        Info "non signe : SmartScreen avertira au premier lancement (voir README, 'SmartScreen')"
+        # 2 veut dire "pas de certificat" : ce n'est pas un echec. Laisse tel
+        # quel, il resterait le code de sortie du script, et tout appelant qui
+        # le lit -- le workflow GitHub -- y verrait une erreur.
+        $global:LASTEXITCODE = 0
+    }
 }
 
 #------------------------------------------------------- 3. demarrage auto ---
