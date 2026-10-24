@@ -75,14 +75,10 @@ foreach ($nom in @('VILLES', 'INTER')) {
 
 #-------------------------------------------------------------- 4. archive ---
 Write-Host "`n[4/5] Archive"
-New-Item -ItemType Directory -Force $Dist | Out-Null
-$zip = Join-Path $Dist "Ocre-$Version.zip"
-Remove-Item $zip -ErrorAction SilentlyContinue
-#  La licence de la police Inter accompagne l'exe qui l'embarque : l'OFL le
-#  demande, et GeoNames est credite dans les README.
-$fichiers = @('Ocre.exe', 'install.ps1', 'README.md', 'README.en.md', 'LICENSE', 'lib\Inter-LICENSE.txt') | ForEach-Object { Join-Path $Root $_ }
-foreach ($f in $fichiers) { if (-not (Test-Path $f)) { Fail "$f manque"; exit 1 } }
-Compress-Archive -Path $fichiers -DestinationPath $zip -CompressionLevel Optimal
+#  La liste des fichiers vit dans tools\archive.ps1, que le workflow GitHub
+#  utilise aussi.
+$zip = (& powershell.exe -NoProfile -ExecutionPolicy Bypass -File (Join-Path $PSScriptRoot 'archive.ps1') | Select-Object -Last 1)
+if ($LASTEXITCODE -ne 0 -or -not (Test-Path $zip)) { Fail "l'archive n'a pas ete construite (lancez tools\archive.ps1 pour voir pourquoi)"; exit 1 }
 Ok "$zip ($([math]::Round((Get-Item $zip).Length/1MB,2)) Mo)"
 
 #------------------------------------------------------- 5. installateur -------

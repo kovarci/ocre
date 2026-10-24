@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Configuration d'artefact SignPath "installateur" : l'installateur Inno Setup.
+
+  Le workflow le depose sous un nom fixe, Ocre-setup.exe, que la version ne
+  change pas ; il le renomme Ocre-<version>-setup.exe en le reprenant. A coller
+  dans SignPath > projet > Artifact Configurations > Add > Custom, sous le
+  slug "installateur".
+-->
+<artifact-configuration xmlns="http://signpath.io/artifact-configuration/v1">
+  <zip-file>
+    <pe-file path="Ocre-setup.exe">
+      <authenticode-sign/>
+    </pe-file>
+  </zip-file>
+</artifact-configuration>

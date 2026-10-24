@@ -681,6 +681,45 @@ month after identity verification, a classic OV certificate about two
 hundred euros a year. `-SelfSigned` makes a test one that convinces nobody
 but verifies the chain.
 
+### Code signing policy
+
+> **Status:** the application for free code signing from the SignPath
+> Foundation is pending. Until it is accepted, the published files -- 1.3.0
+> included -- **are not signed**. This line will go away once it is.
+
+Free code signing provided by [SignPath.io](https://signpath.io), certificate
+by [SignPath Foundation](https://signpath.org).
+
+**What is signed.** `Ocre.exe` (also inside the `.zip` archive) and
+`Ocre-<version>-setup.exe`. The `.zip` archive itself is not a signable file.
+
+**Where it comes from.** Only from
+[`.github/workflows/release.yml`](.github/workflows/release.yml), run by
+GitHub Actions from a tag of this repository, with build tools pinned to a
+version and a hash ([`tools/outils-ci.ps1`](tools/outils-ci.ps1)). Nothing is
+signed from a local machine. Every release published by this workflow also
+attaches `SHA256SUMS.txt`.
+
+**Who decides.**
+
+| Role | Who |
+|---|---|
+| Authors (change the code without further review) | [@kovarci](https://github.com/kovarci) |
+| Reviewers (review contributions from non-committers) | [@kovarci](https://github.com/kovarci) |
+| Approvers (decide whether a release can be signed; each signing request is approved by hand) | [@kovarci](https://github.com/kovarci) |
+
+**Privacy.** Ocre does not transfer any information to other networked
+systems: its code opens no connection. The city table (GeoNames) and the font
+(Inter) are embedded in the executable; the only files Ocre writes are your
+settings, in `%APPDATA%\Ocre`. The installer opens no connection either. No
+third-party service is involved, so no third-party privacy policy applies.
+
+**Checking a signature.** File properties > *Digital Signatures*, or:
+
+```powershell
+Get-AuthenticodeSignature .\Ocre-1.3.0-setup.exe | Format-List
+```
+
 ### If the screen stays warm
 
 The ramp does not belong to the application: it is a global state of the
@@ -1227,6 +1266,8 @@ process, fixes everything ([`lib/Compositeur.ahk`](lib/Compositeur.ahk)).
 | [`tools/test-perf.ahk`](tools/test-perf.ahk) | is startup fast, is rest silent? |
 | [`tools/release.ps1`](tools/release.ps1) | builds, tests, checks the resources, packs it all into `dist\Ocre-<version>.zip` and builds the installer |
 | [`tools/installer.ps1`](tools/installer.ps1) | builds `dist\Ocre-<version>-setup.exe` with Inno Setup (fetched by winget if missing) |
+| [`.github/workflows/release.yml`](.github/workflows/release.yml) | on a tag: builds, gets it signed (SignPath), publishes the release; [`.signpath/`](.signpath/) describes its artefacts |
+| [`tools/outils-ci.ps1`](tools/outils-ci.ps1), [`tools/archive.ps1`](tools/archive.ps1) | the pinned build chain (versions and hashes); the `.zip` archive, shared with `release.ps1` |
 | [`tools/test-installateur.ps1`](tools/test-installateur.ps1) | plays the test installer -- install, update, roll back -- without elevation, on dummy keys |
 | [`installer/`](installer/) | the installer's Inno Setup script, and `utilisateur.ps1`, what it sets in the user's own account (startup task, `Win+Ctrl+C`) |
 | [`tools/sign.ps1`](tools/sign.ps1) | signs `Ocre.exe`, when there is a certificate |

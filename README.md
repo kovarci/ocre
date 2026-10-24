@@ -700,6 +700,49 @@ quelques euros par mois apres verification d'identite, un certificat OV
 classique environ deux cents euros par an. `-SelfSigned` en fabrique un de
 test qui ne convainc personne, mais verifie la chaine.
 
+### Code signing policy
+
+> **Etat :** la demande de signature gratuite aupres de la SignPath Foundation
+> est en cours. Tant qu'elle n'est pas acceptee, les fichiers publies -- dont
+> la 1.3.0 -- **ne sont pas signes**. Cette ligne disparaitra a l'acceptation.
+
+Free code signing provided by [SignPath.io](https://signpath.io), certificate
+by [SignPath Foundation](https://signpath.org).
+
+**Ce qui est signe.** `Ocre.exe` (aussi present dans l'archive `.zip`) et
+`Ocre-<version>-setup.exe`. L'archive `.zip` elle-meme n'est pas un fichier
+signable.
+
+**D'ou ca sort.** Uniquement de
+[`.github/workflows/release.yml`](.github/workflows/release.yml), execute par
+GitHub Actions a partir d'un tag de ce depot, avec des outils de construction
+epingles a une version et a une empreinte
+([`tools/outils-ci.ps1`](tools/outils-ci.ps1)). Rien n'est signe depuis un
+poste local. Chaque release publiee par ce workflow joint aussi
+`SHA256SUMS.txt`.
+
+**Qui decide.**
+
+| Role | Qui |
+|---|---|
+| Auteurs (modifient le code sans relecture supplementaire) | [@kovarci](https://github.com/kovarci) |
+| Relecteurs (relisent les contributions de tiers) | [@kovarci](https://github.com/kovarci) |
+| Approbateurs (decident si une release peut etre signee ; chaque demande de signature est approuvee a la main) | [@kovarci](https://github.com/kovarci) |
+
+**Confidentialite.** Ocre ne transmet aucune information a un autre systeme
+en reseau : son code n'ouvre aucune connexion. La table des villes (GeoNames)
+et la police (Inter) sont embarquees dans l'executable ; les seuls fichiers
+qu'Ocre ecrit sont vos reglages, dans `%APPDATA%\Ocre`. L'installateur n'ouvre
+pas de connexion non plus. Aucun service tiers n'intervient, donc aucune
+politique de confidentialite tierce ne s'applique.
+
+**Verifier une signature.** Proprietes du fichier > *Signatures numeriques*,
+ou :
+
+```powershell
+Get-AuthenticodeSignature .\Ocre-1.3.0-setup.exe | Format-List
+```
+
 ### Si l'ecran reste chaud
 
 La rampe n'appartient pas a l'application : c'est un etat global du pilote
@@ -1269,6 +1312,8 @@ processus, regle tout ([`lib/Compositeur.ahk`](lib/Compositeur.ahk)).
 | [`tools/test-perf.ahk`](tools/test-perf.ahk) | le demarrage est-il rapide, le repos silencieux ? |
 | [`tools/release.ps1`](tools/release.ps1) | construit, teste, verifie les ressources, range le tout dans `dist\Ocre-<version>.zip` et construit l'installateur |
 | [`tools/installer.ps1`](tools/installer.ps1) | construit `dist\Ocre-<version>-setup.exe` avec Inno Setup (recupere par winget au besoin) |
+| [`.github/workflows/release.yml`](.github/workflows/release.yml) | sur un tag : construit, fait signer (SignPath), publie la release ; [`.signpath/`](.signpath/) en decrit les artefacts |
+| [`tools/outils-ci.ps1`](tools/outils-ci.ps1), [`tools/archive.ps1`](tools/archive.ps1) | la chaine de construction epinglee (versions et empreintes) ; l'archive `.zip`, partagee avec `release.ps1` |
 | [`tools/test-installateur.ps1`](tools/test-installateur.ps1) | joue l'installateur d'essai -- installation, mise a jour, retour arriere -- sans elevation, sur des cles factices |
 | [`installer/`](installer/) | le script Inno Setup de l'installateur, et `utilisateur.ps1`, ce qu'il pose dans le compte de l'utilisateur (tache de demarrage, `Win+Ctrl+C`) |
 | [`tools/sign.ps1`](tools/sign.ps1) | signe `Ocre.exe`, quand il y a un certificat |

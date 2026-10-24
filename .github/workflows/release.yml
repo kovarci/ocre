@@ -1,0 +1,244 @@
+# Release d'Ocre : construit Ocre.exe, l'archive et l'installateur sur un
+# executeur GitHub, les fait signer par SignPath, puis publie la release.
+#
+#   - un tag vX.Y.Z (qui doit valoir la version de Ocre.ahk)  ->  construit,
+#     signe avec la politique "release-signing", PUBLIE la release ;
+#   - "Run workflow" a la main                                ->  construit et
+#     signe avec "test-signing" (certificat d'essai), ne publie RIEN : les
+#     fichiers sont dans les artefacts de l'execution.
+#
+# Personne ne signe un fichier construit a la main : ce qui est signe sort de
+# ce workflow, a partir d'un commit du depot -- c'est ce que SignPath verifie
+# (https://docs.signpath.io/origin-verification).
+#
+# MISE EN PLACE de la signature (une fois, voir README, "Code signing policy") :
+#   1. SignPath : projet, politiques "test-signing" et "release-signing",
+#      deux configurations d'artefact "exe" et "installateur" (le contenu est
+#      dans .signpath/artifact-configurations/), GitHub.com comme systeme de
+#      construction de confiance, application SignPath installee sur le depot.
+#   2. GitHub > Settings > Secrets and variables > Actions :
+#        secret    SIGNPATH_API_TOKEN          (jeton d'un utilisateur "submitter")
+#        variable  SIGNPATH_ORGANIZATION_ID
+#        variable  SIGNPATH_PROJECT_SLUG       (ex. ocre)
+#
+# Tant que les deux variables n'existent pas, le workflow construit et publie
+# des fichiers NON signes -- comme avant -- et le dit dans son resume.
+
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  SIGNER: ${{ vars.SIGNPATH_ORGANIZATION_ID != '' && vars.SIGNPATH_PROJECT_SLUG != '' }}
+  POLITIQUE: ${{ github.ref_type == 'tag' && 'release-signing' || 'test-signing' }}
+
+jobs:
+  construire:
+    runs-on: windows-latest
+    timeout-minutes: 90
+    steps:
+      - name: Recuperer le depot
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      #  Un tag qui ne dit pas la version du source donnerait une release
+      #  etiquetee d'un numero et construite d'un autre.
+      - name: Version
+        shell: pwsh
+        env:
+          REF_TYPE: ${{ github.ref_type }}
+          REF_NAME: ${{ github.ref_name }}
+        run: |
+          if ((Get-Content Ocre.ahk -Raw) -notmatch ';@Ahk2Exe-SetVersion\s+([0-9][0-9.]*)') {
+            throw "pas de directive SetVersion dans Ocre.ahk"
+          }
+          $v = $Matches[1]
+          if ($env:REF_TYPE -eq 'tag' -and $env:REF_NAME -ne "v$v") {
+            throw "le tag '$($env:REF_NAME)' ne correspond pas a la version $v de Ocre.ahk"
+          }
+          "VERSION=$v" >> $env:GITHUB_ENV
+          "Ocre $v" | Write-Host
+
+      - name: Outils (AutoHotkey, Ahk2Exe, Inno Setup en versions epinglees)
+        shell: pwsh
+        run: ./tools/outils-ci.ps1
+
+      #  Seulement ceux qui ne demandent ni ecran ni materiel (voir README,
+      #  "Les tests") ; la suite complete tourne dans tools\release.ps1.
+      - name: Tests de calcul
+        shell: pwsh
+        run: |
+          $ahk = Join-Path $env:LOCALAPPDATA 'Programs\AutoHotkey\v2\AutoHotkey64.exe'
+          foreach ($t in 'test-courbe', 'test-soleil') {
+            $p = Start-Process $ahk -ArgumentList '/ErrorStdOut', "`"$PWD\tools\$t.ahk`"" -Wait -PassThru -NoNewWindow
+            if ($p.ExitCode -ne 0) { throw "$t : code $($p.ExitCode)" }
+          }
+
+      - name: Construire Ocre.exe
+        shell: pwsh
+        run: ./install.ps1 -Build -NoStart -NoStartup -NoRegistry
+
+      #  Comme tools\release.ps1 : l'exe dit la bonne version et embarque ses
+      #  deux ressources (un nom de ressource y est en UTF-16, sans compression).
+      - name: Verifier Ocre.exe
+        shell: pwsh
+        run: |
+          $fv = (Get-Item Ocre.exe).VersionInfo.FileVersion
+          if ($fv -notlike "$($env:VERSION)*") { throw "l'exe dit la version '$fv', le source dit '$($env:VERSION)'" }
+          $texte = [Text.Encoding]::Unicode.GetString([IO.File]::ReadAllBytes('Ocre.exe'))
+          foreach ($nom in 'VILLES', 'INTER') {
+            if ($texte.IndexOf($nom) -lt 0) { throw "ressource $nom absente de l'exe" }
+          }
+
+      #--------------------------------------------------------- Ocre.exe ----
+      - name: Preparer Ocre.exe pour la signature
+        if: env.SIGNER == 'true'
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force a-signer/exe | Out-Null
+          Copy-Item Ocre.exe a-signer/exe/
+
+      - name: Deposer Ocre.exe (non signe)
+        id: depot-exe
+        if: env.SIGNER == 'true'
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: ocre-exe-non-signe
+          path: a-signer/exe/Ocre.exe
+          if-no-files-found: error
+          retention-days: 7
+
+      - name: Faire signer Ocre.exe
+        if: env.SIGNER == 'true'
+        uses: signpath/github-action-submit-signing-request@f6d04783b4569d051e0c80105fe66e82819d0092 # v3.0
+        with:
+          api-token: ${{ secrets.SIGNPATH_API_TOKEN }}
+          organization-id: ${{ vars.SIGNPATH_ORGANIZATION_ID }}
+          project-slug: ${{ vars.SIGNPATH_PROJECT_SLUG }}
+          signing-policy-slug: ${{ env.POLITIQUE }}
+          artifact-configuration-slug: exe
+          github-artifact-id: ${{ steps.depot-exe.outputs.artifact-id }}
+          wait-for-completion: true
+          wait-for-completion-timeout-in-seconds: 3600
+          output-artifact-directory: signe/exe
+
+      - name: Remplacer Ocre.exe par l'exe signe
+        if: env.SIGNER == 'true'
+        shell: pwsh
+        run: |
+          Copy-Item signe/exe/Ocre.exe Ocre.exe -Force
+          $s = Get-AuthenticodeSignature Ocre.exe
+          if ($null -eq $s.SignerCertificate) { throw "Ocre.exe n'est pas signe" }
+          if ($env:POLITIQUE -eq 'release-signing' -and $s.Status -ne 'Valid') { throw "signature d'Ocre.exe : $($s.Status)" }
+          "Ocre.exe : $($s.Status), $($s.SignerCertificate.Subject)" | Write-Host
+
+      #-------------------------------------------------- archive, installateur
+      - name: Archive
+        shell: pwsh
+        run: ./tools/archive.ps1
+
+      - name: Installateur
+        shell: pwsh
+        run: ./tools/installer.ps1
+
+      - name: Preparer l'installateur pour la signature
+        if: env.SIGNER == 'true'
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force a-signer/installateur | Out-Null
+          Copy-Item "dist/Ocre-$($env:VERSION)-setup.exe" a-signer/installateur/Ocre-setup.exe
+
+      - name: Deposer l'installateur (non signe)
+        id: depot-installateur
+        if: env.SIGNER == 'true'
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: ocre-installateur-non-signe
+          path: a-signer/installateur/Ocre-setup.exe
+          if-no-files-found: error
+          retention-days: 7
+
+      - name: Faire signer l'installateur
+        if: env.SIGNER == 'true'
+        uses: signpath/github-action-submit-signing-request@f6d04783b4569d051e0c80105fe66e82819d0092 # v3.0
+        with:
+          api-token: ${{ secrets.SIGNPATH_API_TOKEN }}
+          organization-id: ${{ vars.SIGNPATH_ORGANIZATION_ID }}
+          project-slug: ${{ vars.SIGNPATH_PROJECT_SLUG }}
+          signing-policy-slug: ${{ env.POLITIQUE }}
+          artifact-configuration-slug: installateur
+          github-artifact-id: ${{ steps.depot-installateur.outputs.artifact-id }}
+          wait-for-completion: true
+          wait-for-completion-timeout-in-seconds: 3600
+          output-artifact-directory: signe/installateur
+
+      - name: Remplacer l'installateur par l'installateur signe
+        if: env.SIGNER == 'true'
+        shell: pwsh
+        run: |
+          Copy-Item signe/installateur/Ocre-setup.exe "dist/Ocre-$($env:VERSION)-setup.exe" -Force
+          $s = Get-AuthenticodeSignature "dist/Ocre-$($env:VERSION)-setup.exe"
+          if ($null -eq $s.SignerCertificate) { throw "l'installateur n'est pas signe" }
+          if ($env:POLITIQUE -eq 'release-signing' -and $s.Status -ne 'Valid') { throw "signature de l'installateur : $($s.Status)" }
+          "Installateur : $($s.Status), $($s.SignerCertificate.Subject)" | Write-Host
+
+      #  Les empreintes de ce qui sera publie, pour qui veut verifier son
+      #  telechargement ; et le resume de l'execution dit ce qui est signe.
+      - name: Empreintes et resume
+        shell: pwsh
+        run: |
+          Set-Location dist
+          Get-ChildItem Ocre-* | ForEach-Object {
+            "{0}  {1}" -f (Get-FileHash $_.FullName -Algorithm SHA256).Hash.ToLower(), $_.Name
+          } | Set-Content SHA256SUMS.txt -Encoding ascii
+          Get-Content SHA256SUMS.txt | Write-Host
+          $etat = if ($env:SIGNER -eq 'true') { "signe par SignPath (politique $($env:POLITIQUE))" } else { "NON SIGNE (SignPath n'est pas configure)" }
+          @("### Ocre $($env:VERSION) -- $etat", '', '```', (Get-Content SHA256SUMS.txt -Raw).TrimEnd(), '```') -join "`n" >> $env:GITHUB_STEP_SUMMARY
+
+      - name: Deposer les fichiers de la release
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: ocre-release
+          path: |
+            dist/Ocre-*
+            dist/SHA256SUMS.txt
+          if-no-files-found: error
+          retention-days: 14
+
+  publier:
+    needs: construire
+    if: github.ref_type == 'tag'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Recuperer les fichiers
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: ocre-release
+          path: dist
+
+      #  Une release creee a la main existe deja : on y depose les fichiers
+      #  (--clobber remplace ceux du meme nom) plutot que d'echouer.
+      - name: Publier
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" > /dev/null 2>&1; then
+            gh release upload "$TAG" dist/* --repo "$GITHUB_REPOSITORY" --clobber
+          else
+            gh release create "$TAG" dist/* --repo "$GITHUB_REPOSITORY" --verify-tag \
+              --title "Ocre ${TAG#v}" --generate-notes
+          fi
