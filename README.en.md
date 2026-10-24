@@ -1295,13 +1295,20 @@ which the diagnosis above would have been impossible:
 See also [elModo7/WindowsNightLight_CLI](https://github.com/elModo7/WindowsNightLight_CLI)
 and [Fleex's Lab on CloudStore](https://fleexlab.blogspot.com/2017/05/the-windows-cloudstore.html).
 
-Two resources embedded in the executable come from elsewhere:
+Three things embedded in the executable come from elsewhere:
 
 - the city table (`lib/villes.txt`) is extracted from
   [**GeoNames**](https://www.geonames.org/), licensed under
   [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/);
 - the badge font is [**Inter**](https://rsms.me/inter/) by Rasmus Andersson,
-  under the [SIL Open Font License 1.1](lib/Inter-LICENSE.txt).
+  under the [SIL Open Font License 1.1](lib/Inter-LICENSE.txt);
+- the [**AutoHotkey v2**](https://www.autohotkey.com/) interpreter (2.0.30),
+  which the Ahk2Exe compiler places inside `Ocre.exe` so the script runs on
+  its own, under the [GNU GPL v2](lib/AutoHotkey-LICENSE.txt). Its source is
+  [here](https://github.com/AutoHotkey/AutoHotkey/tree/v2.0.30); the exact
+  version is pinned, with its hash, in
+  [`tools/outils-ci.ps1`](tools/outils-ci.ps1). Ocre's own script stays under
+  the MIT licence, which is GPL-compatible.
 
 ## Licence
 

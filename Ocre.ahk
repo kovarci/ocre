@@ -49,6 +49,9 @@ Persistent
 ;@Ahk2Exe-SetName Ocre
 ;@Ahk2Exe-SetDescription Ocre
 ;@Ahk2Exe-SetProductName Ocre
+;@Ahk2Exe-SetCompanyName Ocre contributors
+;@Ahk2Exe-SetCopyright Copyright (c) 2026 Ocre contributors
+;@Ahk2Exe-SetOrigFilename Ocre.exe
 ;@Ahk2Exe-SetVersion 1.3.0
 ;@Ahk2Exe-SetMainIcon Ocre.ico
 ;  La police de la pastille, embarquee en ressource (voir lib\Police.ahk).

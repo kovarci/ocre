@@ -99,8 +99,10 @@ CloseApplications=no
 RestartApplications=no
 
 [Languages]
-Name: "french"; MessagesFile: "compiler:Languages\French.isl"
-Name: "english"; MessagesFile: "compiler:Default.isl"
+; InfoBeforeFile : la page "Information", avant toute modification -- ce que
+; l'installation change dans Windows, dit avant, et non decouvert apres.
+Name: "french"; MessagesFile: "compiler:Languages\French.isl"; InfoBeforeFile: "info-fr.txt"
+Name: "english"; MessagesFile: "compiler:Default.isl"; InfoBeforeFile: "info-en.txt"
 
 [CustomMessages]
 french.Fenetre=Réglages Windows :
@@ -133,8 +135,10 @@ Source: "utilisateur.ps1"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\README.md"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\README.en.md"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\LICENSE"; DestDir: "{app}"; Flags: ignoreversion
-; L'OFL demande que la licence de la police accompagne l'exe qui l'embarque.
+; L'OFL demande que la licence de la police accompagne l'exe qui l'embarque ;
+; la GPL, celle de l'interpreteur AutoHotkey que Ahk2Exe embarque aussi.
 Source: "..\lib\Inter-LICENSE.txt"; DestDir: "{app}"; Flags: ignoreversion
+Source: "..\lib\AutoHotkey-LICENSE.txt"; DestDir: "{app}"; Flags: ignoreversion
 
 [Icons]
 Name: "{autoprograms}\{#NomApp}\Ocre"; Filename: "{app}\Ocre.exe"

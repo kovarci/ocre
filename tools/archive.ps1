@@ -1,10 +1,11 @@
 <#
     archive.ps1 -- dist\Ocre-<version>.zip : l'archive sans installateur.
 
-    Ocre.exe, install.ps1, les deux README, la licence et celle de la police
-    Inter. install.ps1 se suffit a lui-meme quand l'exe est la : il ne demande
-    tools\ que pour construire. La licence de la police accompagne l'exe qui
-    l'embarque (l'OFL le demande) ; GeoNames est credite dans les README.
+    Ocre.exe, install.ps1, les deux README, la licence et celles de la police
+    Inter et de l'interpreteur AutoHotkey. install.ps1 se suffit a lui-meme
+    quand l'exe est la : il ne demande tools\ que pour construire. Ces deux
+    licences accompagnent l'exe qui les embarque (l'OFL et la GPL le
+    demandent) ; GeoNames est credite dans les README.
 
     Une seule liste, pour tools\release.ps1 et pour le workflow GitHub : elles
     ne peuvent pas diverger. Rend le chemin de l'archive.
@@ -28,7 +29,7 @@ New-Item -ItemType Directory -Force $Dist | Out-Null
 $zip = Join-Path $Dist "Ocre-$Version.zip"
 Remove-Item $zip -ErrorAction SilentlyContinue
 
-$fichiers = @('Ocre.exe', 'install.ps1', 'README.md', 'README.en.md', 'LICENSE', 'lib\Inter-LICENSE.txt') |
+$fichiers = @('Ocre.exe', 'install.ps1', 'README.md', 'README.en.md', 'LICENSE', 'lib\Inter-LICENSE.txt', 'lib\AutoHotkey-LICENSE.txt') |
     ForEach-Object { Join-Path $Root $_ }
 foreach ($f in $fichiers) { if (-not (Test-Path $f)) { throw "$f manque" } }
 

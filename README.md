@@ -1341,13 +1341,20 @@ le diagnostic ci-dessus aurait ete impossible :
 Voir aussi [elModo7/WindowsNightLight_CLI](https://github.com/elModo7/WindowsNightLight_CLI)
 et [Fleex's Lab sur CloudStore](https://fleexlab.blogspot.com/2017/05/the-windows-cloudstore.html).
 
-Deux ressources embarquees dans l'executable viennent d'ailleurs :
+Trois elements embarques dans l'executable viennent d'ailleurs :
 
 - la table des villes (`lib/villes.txt`) est extraite de
   [**GeoNames**](https://www.geonames.org/), sous licence
   [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) ;
 - la police de la pastille est [**Inter**](https://rsms.me/inter/) de Rasmus
-  Andersson, sous [SIL Open Font License 1.1](lib/Inter-LICENSE.txt).
+  Andersson, sous [SIL Open Font License 1.1](lib/Inter-LICENSE.txt) ;
+- l'interpreteur [**AutoHotkey v2**](https://www.autohotkey.com/) (2.0.30),
+  que le compilateur Ahk2Exe place dans `Ocre.exe` pour que le script
+  s'execute seul, sous [GNU GPL v2](lib/AutoHotkey-LICENSE.txt). Son code
+  source est [ici](https://github.com/AutoHotkey/AutoHotkey/tree/v2.0.30) ;
+  la version exacte est epinglee, avec son empreinte, dans
+  [`tools/outils-ci.ps1`](tools/outils-ci.ps1). Le script d'Ocre, lui, reste
+  sous licence MIT, compatible avec la GPL.
 
 ## Licence
 

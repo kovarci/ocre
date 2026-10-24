@@ -1,0 +1,33 @@
+﻿What this installation changes in Windows
+=========================================
+
+Ocre installs into C:\Program Files\Ocre. To work, it changes a few Windows
+settings. Here they are, before you continue.
+
+1. Gamma ramp ceiling  (required)
+   The GdiIcmGammaRange value is set to 256, under
+   HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\ICM.
+   Without it, Windows clips the colour ramp and the filter hits a ceiling.
+   This key is why the installer asks for administrator rights. You need to
+   sign out of Windows and back in for it to take effect.
+
+2. Windows' Win+Ctrl+C colour-filter shortcut  (optional)
+   The HotkeyEnabled value is set to 0, under
+   HKEY_CURRENT_USER\Software\Microsoft\ColorFiltering. That shortcut
+   collides with Ctrl+F7 on some laptops. It is the shortcut that is turned
+   off, not Windows' colour filter.
+
+3. Start with Windows  (optional)
+   A scheduled task named "Ocre" launches Ocre when you sign in, without
+   administrator rights.
+
+Rolling back
+   Before changing anything, the installer records the original state of
+   these settings in C:\Program Files\Ocre\sauvegarde. Uninstalling gives
+   back exactly what the installer changed, and nothing else. The
+   avant-installation.reg file can also do it by hand (double-click), and the
+   Start menu has a shortcut to it.
+
+Ocre opens no network connection. Your settings are written to
+%APPDATA%\Ocre; they are kept when you uninstall, unless you ask to delete
+them.

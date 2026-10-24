@@ -1,0 +1,34 @@
+﻿Ce que cette installation change dans Windows
+=============================================
+
+Ocre s'installe dans C:\Program Files\Ocre. Pour fonctionner, il modifie
+quelques réglages de Windows. Les voici, avant que vous ne poursuiviez.
+
+1. Plafond de la rampe gamma  (obligatoire)
+   La valeur GdiIcmGammaRange est posée à 256, dans
+   HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\ICM.
+   Sans elle, Windows rogne la rampe de couleur et le filtre plafonne.
+   C'est pour cette clé que l'installation demande les droits
+   d'administrateur. Il faut fermer puis rouvrir la session Windows pour
+   qu'elle soit prise en compte.
+
+2. Raccourci Win+Ctrl+C des filtres de couleur de Windows  (au choix)
+   La valeur HotkeyEnabled est mise à 0, dans
+   HKEY_CURRENT_USER\Software\Microsoft\ColorFiltering. Ce raccourci entre
+   en collision avec Ctrl+F7 sur certains portables. C'est le raccourci qui
+   est coupé, pas le filtre de couleur de Windows.
+
+3. Démarrage automatique  (au choix)
+   Une tâche planifiée nommée "Ocre" lance Ocre à l'ouverture de votre
+   session, sans droits d'administrateur.
+
+Retour en arrière
+   Avant de modifier quoi que ce soit, l'installation note l'état d'origine
+   de ces réglages dans C:\Program Files\Ocre\sauvegarde. La désinstallation
+   rend exactement ce que l'installation a changé, et rien d'autre. Le
+   fichier avant-installation.reg permet aussi de le faire à la main (un
+   double-clic), et le menu Démarrer en donne un raccourci.
+
+Ocre n'ouvre aucune connexion réseau. Vos réglages sont écrits dans
+%APPDATA%\Ocre ; ils sont conservés à la désinstallation, sauf si vous
+demandez à les supprimer.
