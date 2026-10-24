@@ -1,0 +1,14 @@
+# Les actions du workflow sont epinglees par SHA (voir release.yml) : sans aide,
+# elles ne bougent jamais. Dependabot propose chaque semaine la version
+# suivante, SHA compris -- a relire comme n'importe quel changement de la chaine
+# de construction, puisque c'est elle qui produit ce qu'on signe.
+version: 2
+updates:
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    commit-message:
+      prefix: "ci"
+    labels:
+      - "dependencies"

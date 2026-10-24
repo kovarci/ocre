@@ -1,0 +1,26 @@
+name: Feature request
+description: An idea to make Ocre better
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem would it solve?
+      description: Describe the situation, not the solution. "At night my second screen is still too bright" is more useful than "add a slider".
+    validations:
+      required: true
+  - type: textarea
+    id: idea
+    attributes:
+      label: What would you like to see?
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: What do you do today instead?
+  - type: markdown
+    attributes:
+      value: |
+        Ocre is deliberately small: no network access, no account, nothing that runs without
+        you asking. Ideas that keep to that have the best chance.

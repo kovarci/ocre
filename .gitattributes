@@ -1,0 +1,9 @@
+# Texte normalise en LF dans le depot, quelle que soit la machine.
+* text=auto
+
+# Les binaires ne sont ni normalises ni compares comme du texte.
+*.ico binary
+*.png binary
+*.ttf binary
+*.exe binary
+*.zip binary

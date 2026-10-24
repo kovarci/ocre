@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Security vulnerability
+    url: https://github.com/kovarci/ocre/security/advisories/new
+    about: Please report security problems privately, not as a public issue.
+  - name: The screen stays warm, or the shortcuts do not answer
+    url: https://github.com/kovarci/ocre/blob/main/docs/en/troubleshooting.md
+    about: Most common problems (stuck filter, function keys, grey screen) are answered here.

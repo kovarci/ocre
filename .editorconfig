@@ -1,0 +1,26 @@
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+indent_style = space
+indent_size = 4
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+[*.md]
+trim_trailing_whitespace = false
+
+[*.{yml,yaml,json}]
+indent_size = 2
+
+# UTF-8 AVEC BOM : sans lui, AutoHotkey lit les accents en ANSI (I18n.ahk) et
+# Inno Setup aussi (le script et ses textes). Ne pas l'enlever.
+[lib/I18n.ahk]
+charset = utf-8-bom
+
+[installer/*.{iss,txt}]
+charset = utf-8-bom
+
+[*.xml]
+indent_size = 2
