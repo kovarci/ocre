@@ -204,7 +204,7 @@ if ((Test-Path $Exe) -and -not $Build) {
     # quel : SmartScreen le dira, le README explique pourquoi.
     & powershell.exe -NoProfile -ExecutionPolicy Bypass -File (Join-Path $Root 'tools\sign.ps1') -Fichier $Exe
     if ($LASTEXITCODE -eq 2) {
-        Info "non signe : SmartScreen avertira au premier lancement (voir README, 'SmartScreen')"
+        Info "non signe : SmartScreen avertira au premier lancement (voir docs\fr\installation.md, 'SmartScreen')"
         # 2 veut dire "pas de certificat" : ce n'est pas un echec. Laisse tel
         # quel, il resterait le code de sortie du script, et tout appelant qui
         # le lit -- le workflow GitHub -- y verrait une erreur.

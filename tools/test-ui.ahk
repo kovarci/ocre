@@ -72,20 +72,27 @@ Verifier(nom, condition, detail := "") {
 ;  l'application telle qu'on la lance.
 try TraySetIcon(A_ScriptDir . "\..\Ocre.ico")
 
+;  La langue des fenetres, "fr" par defaut. OCRE_TEST_LANGUE=en rejoue tout en
+;  anglais -- c'est ainsi que sont prises les illustrations anglaises de
+;  docs\img (tools\captures.ps1) ; les photos vont alors dans leur propre
+;  dossier. Les verifications qui lisent un texte francais n'ont de sens qu'en
+;  francais : en anglais, seule l'ouverture des fenetres compte.
+LANGUE := EnvGet("OCRE_TEST_LANGUE") != "" ? EnvGet("OCRE_TEST_LANGUE") : "fr"
+
 ;  Jamais la vraie configuration. Le dossier garde aussi les photos.
-DOSSIER := A_Temp . "\ocre-test-ui"
+DOSSIER := A_Temp . "\ocre-test-ui" . (LANGUE = "fr" ? "" : "-" . LANGUE)
 Config.DOSSIER := DOSSIER
 Config.FICHIER := DOSSIER . "\essai.ini"
 try DirCreate(DOSSIER)
 try FileDelete(Config.FICHIER)
-Config.Ecrire("langue", "fr")
+Config.Ecrire("langue", LANGUE)
 Config.Ecrire("intensite", 58)
 Config.Ecrire("luminosite", 80)
 Config.Ecrire("unite", "k")
 Config.Ecrire("hk_gris", "^!G")
 Config.Ecrire("lat", "45.75"), Config.Ecrire("lon", "4.85")
 
-I18n.Definir("fr")
+I18n.Definir(LANGUE)
 Filtre.Charger()
 Raccourcis.refuses := ["^F7"]
 
@@ -313,7 +320,7 @@ Photo(Apropos.gui.Hwnd, DOSSIER . "\apropos-en.png")
 Verifier("en anglais, la version s'ecrit Version 9.8.7", InStr(Apropos.c["version"].Text, "Version 9.8.7") = 1
        , Apropos.c["version"].Text)
 Apropos.Fermer()
-I18n.Definir("fr")
+I18n.Definir(LANGUE)
 
 ;----------------------------------------------------------- raccourcis ----
 Raccourcis.Ouvrir()
@@ -365,6 +372,7 @@ Verifier("'21:00' se lit 1260", Horaire.EnMinutes("21:00", -1) = 1260)
 Verifier("'25:00' et 'abc' retombent sur le defaut"
        , Horaire.EnMinutes("25:00", -1) = -1 && Horaire.EnMinutes("abc", -1) = -1 && Horaire.EnMinutes("13 pm", -1) = -1)
 Verifier("ce qui s'ecrit reste en 24 h", Horaire.EnTexte(1260) = "21:00")
+I18n.Definir(LANGUE)
 
 ;------------------------------------------------------------- pastille ----
 Osd.Montrer(58, "", -1, "", 0)

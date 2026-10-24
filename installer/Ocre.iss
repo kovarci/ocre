@@ -133,7 +133,7 @@ Source: "..\Ocre.exe"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\Ocre.exe"; Flags: dontcopy
 Source: "utilisateur.ps1"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\README.md"; DestDir: "{app}"; Flags: ignoreversion
-Source: "..\README.en.md"; DestDir: "{app}"; Flags: ignoreversion
+Source: "..\README.fr.md"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\LICENSE"; DestDir: "{app}"; Flags: ignoreversion
 ; L'OFL demande que la licence de la police accompagne l'exe qui l'embarque ;
 ; la GPL, celle de l'interpreteur AutoHotkey que Ahk2Exe embarque aussi.

@@ -74,8 +74,9 @@ jobs:
         shell: pwsh
         run: ./tools/outils-ci.ps1
 
-      #  Seulement ceux qui ne demandent ni ecran ni materiel (voir README,
-      #  "Les tests") ; la suite complete tourne dans tools\release.ps1.
+      #  Seulement ceux qui ne demandent ni ecran ni materiel (voir
+      #  docs/fr/development.md, "Les tests") ; la suite complete tourne dans
+      #  tools\release.ps1.
       - name: Tests de calcul
         shell: pwsh
         run: |

@@ -12,10 +12,6 @@ name: CI
 on:
   push:
     branches: ["**"]
-    paths-ignore:
-      - "**.md"
-      - "docs/**"
-      - ".github/ISSUE_TEMPLATE/**"
   pull_request:
   workflow_dispatch:
 
@@ -36,6 +32,11 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+
+      #  Une page deplacee, un titre renomme : le lien qui y menait se voit ici.
+      - name: Liens de la documentation
+        shell: pwsh
+        run: ./tools/liens.ps1
 
       - name: Outils (AutoHotkey, Ahk2Exe, Inno Setup en versions epinglees)
         shell: pwsh

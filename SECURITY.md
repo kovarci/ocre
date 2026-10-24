@@ -37,7 +37,7 @@ deserve scrutiny are therefore local:
 ## What is not
 
 - The Windows SmartScreen warning on files that are not (yet) code-signed. It is
-  documented in the [README](README.md#smartscreen) and is not a vulnerability.
+  documented in the [installation guide](docs/en/installation.md#smartscreen) and is not a vulnerability.
 - Antivirus products flagging a compiled AutoHotkey executable. Please report those
   to the vendor as false positives; the source is public.
 - Anything that requires administrator rights you already have.

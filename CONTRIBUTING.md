@@ -32,6 +32,8 @@ cd ocre
 | Build `Ocre.exe` (no install, no registry) | `.\install.ps1 -Build -NoStart -NoStartup -NoRegistry` |
 | Build the installer (needs Inno Setup, fetched by winget) | `.\tools\installer.ps1` |
 | Play the installer's install / update / rollback | `.\tools\test-installateur.ps1` |
+| Check the links in the documentation | `.\tools\liens.ps1` |
+| Regenerate the screenshots (`docs/img`) | `.\tools\captures.ps1` |
 | Do all of it and produce `dist\` | `.\tools\release.ps1` |
 
 The tests open Ocre's own windows on the desktop for about twenty seconds and write

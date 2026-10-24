@@ -29,7 +29,7 @@ New-Item -ItemType Directory -Force $Dist | Out-Null
 $zip = Join-Path $Dist "Ocre-$Version.zip"
 Remove-Item $zip -ErrorAction SilentlyContinue
 
-$fichiers = @('Ocre.exe', 'install.ps1', 'README.md', 'README.en.md', 'LICENSE', 'lib\Inter-LICENSE.txt', 'lib\AutoHotkey-LICENSE.txt') |
+$fichiers = @('Ocre.exe', 'install.ps1', 'README.md', 'README.fr.md', 'LICENSE', 'lib\Inter-LICENSE.txt', 'lib\AutoHotkey-LICENSE.txt') |
     ForEach-Object { Join-Path $Root $_ }
 foreach ($f in $fichiers) { if (-not (Test-Path $f)) { throw "$f manque" } }
 
