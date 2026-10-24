@@ -110,6 +110,9 @@ Fatal(e, mode) {
 ;  Ocre.exe /rappel      fait respirer l'icone, comme le rappel des 20-20-20
 ;  Ocre.exe /get         ecrit l'etat sur la sortie standard ; code de retour
 ;                        = intensite
+;  Ocre.exe /version     ecrit la version
+;  Ocre.exe /diag        ecrit de quoi signaler un probleme : version, Windows,
+;                        ecrans, etat des reglages qui comptent
 ;  Ocre.exe /reset       rampe neutre et arret
 ;  Ocre.exe /quit        arret propre
 ;  Ocre.exe /help        cette liste
@@ -155,6 +158,8 @@ CMD_AIDE := 91
 CMD_ERREUR := 92
 CMD_EXPORT := 93           ; ordre.chemin : le fichier
 CMD_IMPORT := 94
+CMD_VERSION := 95
+CMD_DIAG := 96
 
 AIDE := "
 (
@@ -172,6 +177,8 @@ Ocre -- filtre de lumiere chaude / warm light filter
   Ocre.exe /horaire on    planificateur : on, off, ou rien pour basculer  (schedule)
   Ocre.exe /rappel        fait respirer l'icone, comme le rappel des 20-20-20  (reminder)
   Ocre.exe /get           etat courant ; code de retour = intensite
+  Ocre.exe /version       la version
+  Ocre.exe /diag          de quoi signaler un probleme  (diagnostic, for bug reports)
   Ocre.exe /export f.ini  copie les reglages dans un fichier   (export)
   Ocre.exe /import f.ini  prend les reglages d'un fichier      (import)
   Ocre.exe /reset         rampe neutre et arret
@@ -203,6 +210,14 @@ if (ordre.code = CMD_AIDE || ordre.code = CMD_ERREUR) {
 if (ordre.code = CMD_ETAT) {
     Console(Etat())
     ExitApp(Config.LireNombre("intensite"))
+}
+if (ordre.code = CMD_VERSION) {
+    Console("Ocre " . Version())
+    ExitApp(0)
+}
+if (ordre.code = CMD_DIAG) {
+    Console(Diagnostic())
+    ExitApp(0)
 }
 
 ;  /export et /import travaillent sur le fichier eux-memes -- un chemin ne
@@ -286,6 +301,7 @@ LireArguments() {
     global CMD_PRESET, CMD_CHAMBRE, CMD_HORAIRE, CMD_RAPPEL
     global CMD_INTENSITE_REL, CMD_LUMINOSITE_REL, DECALAGE
     global CMD_ETAT, CMD_AIDE, CMD_ERREUR, CMD_EXPORT, CMD_IMPORT
+    global CMD_VERSION, CMD_DIAG
 
     if (!A_Args.Length)
         return { code: 0, valeur: 0 }
@@ -344,6 +360,8 @@ LireArguments() {
         case "chambre", "darkroom":    return { code: CMD_CHAMBRE, valeur: 0 }
         case "rappel", "reminder":     return { code: CMD_RAPPEL, valeur: 0 }
         case "get", "etat", "status":  return { code: CMD_ETAT, valeur: 0 }
+        case "version", "ver":         return { code: CMD_VERSION, valeur: 0 }
+        case "diag", "diagnostic":     return { code: CMD_DIAG, valeur: 0 }
         case "export", "exporter":
             if (arg = "")
                 return Refus("/export attend un nom de fichier")
@@ -431,6 +449,65 @@ EtatEcrans() {
         Ecrans.Oublier()
     }
     return lignes
+}
+
+;  De quoi signaler un probleme, pour /diag et pour le bouton "Copier le
+;  diagnostic" de la fenetre A propos. Ecrit en anglais : il part dans un
+;  ticket, et se lit sans traduction. Rien de personnel -- le dossier des
+;  reglages est ecrit %APPDATA%\Ocre, pas avec le nom de l'utilisateur ; le
+;  nom des ecrans est celui que leur EDID declare. Chaque ligne se protege
+;  seule : un diagnostic partiel vaut mieux qu'aucun, et c'est justement
+;  quand quelque chose ne va pas qu'on le demande.
+Diagnostic() {
+    lignes := []
+    Ajouter(nom, valeur) {
+        lignes.Push(Format("{:-24s}{}", nom, valeur))
+    }
+    Essayer(nom, f) {
+        try
+            Ajouter(nom, f())
+        catch as e
+            Ajouter(nom, "? (" . e.Message . ")")
+    }
+
+    Essayer("Ocre", () => Version() . (A_IsCompiled ? " (exe)" : " (script)"))
+    Essayer("Windows", () => (RegExMatch(A_OSVersion, "\.(\d+)$", &b) && b[1] >= 22000 ? "11" : "10")
+                           . " (" . A_OSVersion . ")" . (A_Is64bitOS ? " x64" : " x86"))
+    Essayer("AutoHotkey", () => A_AhkVersion)
+    Essayer("Droits", () => A_IsAdmin ? "administrateur (elevated)" : "utilisateur")
+    Essayer("Langue", () => Config.Lire("langue"))
+    Essayer("Mise a l'echelle", () => A_ScreenDPI . " dpi")
+    Essayer("Reglages", () => StrReplace(Config.FICHIER, A_AppData, "%APPDATA%")
+                            . (Config.portable ? "  (portable)" : ""))
+    Essayer("Garde-fou gamma", () => Gamma.ClampLeve() ? "leve (GdiIcmGammaRange = 256)"
+                                                      : "NON leve : le filtre plafonnera")
+    Essayer("Demarrage auto", () => Demarrage.TacheExiste() ? "tache planifiee"
+                                  : FileExist(Demarrage.LIEN) ? "raccourci" : "non")
+
+    i := Config.LireNombre("intensite")
+    Essayer("Filtre", () => i . " %  (" . Gamma.Kelvin(i) . " K)"
+                          . ", luminosite " . Max(0, Min(100, Config.LireNombre("luminosite"))) . " %"
+                          . (Config.Lire("horaire") = "1" ? ", horaire" : "")
+                          . (Config.Lire("gris") = "1" ? ", gris" : "")
+                          . (Filtre.Noir() ? ", noir OLED " . Filtre.Noir() : "")
+                          . (Config.Lire("retro") = "1" ? ", retroeclairage" : ""))
+
+    Essayer("Ecrans", () => Ecrans.Nombre()
+                          . (Config.Lire("separes") = "1" ? " (regles separement)" : ""))
+    try {
+        for n, e in Ecrans.Lister()
+            Ajouter("  ecran " . n, e.nom)
+        Ecrans.Oublier()
+    }
+
+    Essayer("Autres filtres", () => (Concurrents.Programmes() != "" ? Concurrents.Programmes() : "aucun programme")
+                                  . (Concurrents.NightLight() ? ", Night Light programme" : "")
+                                  . (Concurrents.FiltreCouleur() ? ", filtre de couleur Windows actif" : ""))
+
+    texte := ""
+    for l in lignes
+        texte .= (texte != "" ? "`n" : "") . l
+    return texte
 }
 
 ;  Ce qu'une instance vivante fait d'une commande recue.
@@ -1563,6 +1640,7 @@ AppDevant() {
 }
 
 Prereglages.Init(ApercuPrereglage)
+Apropos.Init(() => Version(), () => Diagnostic())
 
 ;  Au premier lancement, Ocre demarre a 0 % et rien ne se passe : quelqu'un
 ;  qui vient de l'installer ne voit rien. Deux pastilles, une fois pour

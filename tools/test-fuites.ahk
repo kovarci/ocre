@@ -148,6 +148,16 @@ Tour() {
         Prereglages.Fermer()
         n += 1
     }
+    ;  la fenetre A propos : logo peint, boutons, et le retour de la copie
+    Apropos.Init(() => "1.0.0", () => "diagnostic")
+    Apropos.copier := (t) => 0
+    Loop 8 {
+        Apropos.Ouvrir()
+        Sleep(40)
+        Apropos._Copier()
+        Apropos.Fermer()
+        n += 1
+    }
     return n
 }
 

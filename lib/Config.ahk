@@ -103,7 +103,8 @@ class Config {
         ;  La taille de chaque fenetre, "largeur,hauteur" en points, retenue
         ;  quand on la tire par ses bords (voir Cadre.ahk) : taille_reglages,
         ;  taille_planificateur, taille_raccourcis, taille_prereglages,
-        ;  taille_lieu. Absentes, la fenetre prend la hauteur de son contenu.
+        ;  taille_lieu, taille_apropos. Absentes, la fenetre prend la hauteur
+        ;  de son contenu.
         ;  Apprendre les reglages faits a la main (voir Habitudes.ahk).
         "habitudes",   "0",
         ;  La pastille a l'ecran, a chaque geste. Se coupe dans le panneau

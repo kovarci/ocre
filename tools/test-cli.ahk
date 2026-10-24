@@ -630,6 +630,42 @@ Habitudes.horloge := 0
 Habitudes.presence := 0
 Habitudes.actif := false
 
+;------------------------------------------------------------ traductions ----
+;  Une cle qui n'existe que dans une langue s'afficherait telle quelle -- le
+;  nom interne, "apropos_titre" -- a qui a choisi l'autre.
+manque := ""
+for cle in I18n.TEXTES["fr"] {
+    if (!I18n.TEXTES["en"].Has(cle))
+        manque .= " en:" . cle
+}
+for cle in I18n.TEXTES["en"] {
+    if (!I18n.TEXTES["fr"].Has(cle))
+        manque .= " fr:" . cle
+}
+Verifier("le francais et l'anglais ont les memes cles", manque = "", manque)
+
+;  Et chaque texte que le code demande existe : S("cle") ou I18n.S("cle")
+;  avec une cle litterale. Les cles construites (S(cle . "_i")) ne se lisent
+;  pas dans le source, on ne les cherche pas.
+inconnues := ""
+lues := 0
+fichiers := [A_ScriptDir . "\..\Ocre.ahk"]
+Loop Files, A_ScriptDir . "\..\lib\*.ahk"
+    fichiers.Push(A_LoopFilePath)
+for f in fichiers {
+    src := FileRead(f)
+    pos := 1
+    while (pos := RegExMatch(src, '(?<![A-Za-z_.])(?:I18n\.)?S\("([a-z0-9_]+)"\)', &m, pos)) {
+        lues += 1
+        if (!I18n.TEXTES["fr"].Has(m[1]) && !InStr(inconnues, " " . m[1] . " "))
+            inconnues .= " " . m[1] . " "
+        pos += m.Len
+    }
+}
+Verifier("tout texte demande par le code existe", Trim(inconnues) = "", Trim(inconnues))
+;  Garde-fou : une expression qui ne lirait rien ferait passer le test a vide.
+Verifier("... et l'on a bien lu des appels (" . lues . ")", lues > 80, lues)
+
 ;--------------------------------------------------------------- demarrage ----
 ;  CreerTache est un try qui avale tout : une propriete mal nommee
 ;  (MultipleInstancesPolicy, le nom de l'element XML, au lieu de
@@ -683,6 +719,26 @@ if (DllCall("AttachConsole", "uint", -1)) {
     Verifier("une commande inconnue rend 2", Code("/zzz") = 2)
     c := Code("/get")
     Verifier("/get rend l'intensite, entre 0 et 100", c >= 0 && c <= 100, c)
+
+    ;  Ce que la commande ecrit, lu dans un fichier : "Ocre.exe /diag > f.txt"
+    ;  est precisement ce qu'on colle dans un ticket.
+    Sortie(args) {
+        f := A_Temp . "\ocre-cli-sortie.txt"
+        try FileDelete(f)
+        RunWait(A_ComSpec . ' /c ""' . ahk . '" /ErrorStdOut "' . src . '" ' . args . ' > "' . f . '""', , "Hide")
+        r := FileExist(f) ? FileRead(f) : ""
+        try FileDelete(f)
+        return r
+    }
+    Verifier("/version rend 0", Code("/version") = 0)
+    v := Trim(Sortie("/version"), " `t`r`n")
+    Verifier("/version ecrit 'Ocre x.y.z'", RegExMatch(v, "^Ocre \d+\.\d+\.\d+$"), v)
+    Verifier("/diag rend 0", Code("/diag") = 0)
+    d := Sortie("/diag")
+    Verifier("/diag donne la version, Windows, les ecrans et le garde-fou gamma"
+           , InStr(d, "Ocre ") && InStr(d, "Windows") && InStr(d, "Ecrans") && InStr(d, "Garde-fou gamma")
+           , SubStr(d, 1, 120))
+    Verifier("/diag ne livre pas de dossier utilisateur", !InStr(d, "\Users\"), d)
 
     ;  /export ecrit la VRAIE configuration dans un fichier temporaire, et
     ;  /import la reprend telle quelle : rien ne change pour l'utilisateur.

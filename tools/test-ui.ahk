@@ -66,6 +66,12 @@ Verifier(nom, condition, detail := "") {
     Dire("  RATE  " . nom . (detail != "" ? "   -> " . detail : ""))
 }
 
+;  La barre de titre des fenetres reprend l'icone du script : sans cette ligne,
+;  les photos montrent le "H" vert de l'interpreteur, pas celle d'Ocre. Elles
+;  servent d'illustrations (docs\img) : autant qu'elles soient a l'image de
+;  l'application telle qu'on la lance.
+try TraySetIcon(A_ScriptDir . "\..\Ocre.ico")
+
 ;  Jamais la vraie configuration. Le dossier garde aussi les photos.
 DOSSIER := A_Temp . "\ocre-test-ui"
 Config.DOSSIER := DOSSIER
@@ -268,6 +274,46 @@ Verifier("fermer garde ce qui est a l'ecran (pas de retour en arriere)", apercus
        , apercus.Length)
 Verifier("la valeur est ecrite au clic, sans bouton", Prereglages.Lire("pre_lecture").i = lecture.i + 5
        , Prereglages.Lire("pre_lecture").i)
+
+;------------------------------------------------------------- a propos ----
+;  Les trois effets de bord -- une adresse, le presse-papiers, le dossier --
+;  sont remplaces : le test ne lance pas de navigateur et laisse intact le
+;  presse-papiers de qui le lance.
+lances := [], copies := [], dossiers := []
+Apropos.Init(() => "9.8.7", () => "diagnostic d'essai")
+Apropos.lancer := (cible) => lances.Push(cible)
+Apropos.copier := (texte) => copies.Push(texte)
+Apropos.dossier := () => dossiers.Push(1)
+Apropos.Ouvrir()
+Sleep(500)
+Verifier("la fenetre A propos s'ouvre", Apropos.gui != 0)
+Verifier("elle dit la version", InStr(Apropos.c["version"].Text, "9.8.7"), Apropos.c["version"].Text)
+Photo(Apropos.gui.Hwnd, DOSSIER . "\apropos.png")
+Cliquer(Apropos.c["depot"].ctrl)
+Verifier("le bouton du projet ouvre le depot", lances.Length = 1 && lances[1] = Apropos.DEPOT
+       , lances.Length ? lances[1] : "rien")
+Cliquer(Apropos.c["versions"].ctrl)
+Verifier("... et celui des versions, la page des releases", lances.Length = 2 && lances[2] = Apropos.VERSIONS
+       , lances.Length ? lances[lances.Length] : "rien")
+Verifier("les deux adresses sont celles du depot public"
+       , InStr(Apropos.DEPOT, "https://github.com/") = 1 && InStr(Apropos.VERSIONS, Apropos.DEPOT) = 1)
+Cliquer(Apropos.c["diag"].ctrl)
+Verifier("copier le diagnostic le met dans le presse-papiers", copies.Length = 1 && copies[1] = "diagnostic d'essai"
+       , copies.Length ? copies[1] : "rien")
+Verifier("... et le dit", Apropos.c["etat"].Text != "", Apropos.c["etat"].Text)
+Cliquer(Apropos.c["dossier"].ctrl)
+Verifier("le bouton du dossier des reglages l'ouvre", dossiers.Length = 1, dossiers.Length)
+Apropos.Fermer()
+Verifier("la fenetre A propos se ferme", Apropos.gui = 0)
+;  En anglais aussi : pas de cle qui s'affiche telle quelle.
+I18n.Definir("en")
+Apropos.Ouvrir()
+Sleep(400)
+Photo(Apropos.gui.Hwnd, DOSSIER . "\apropos-en.png")
+Verifier("en anglais, la version s'ecrit Version 9.8.7", InStr(Apropos.c["version"].Text, "Version 9.8.7") = 1
+       , Apropos.c["version"].Text)
+Apropos.Fermer()
+I18n.Definir("fr")
 
 ;----------------------------------------------------------- raccourcis ----
 Raccourcis.Ouvrir()

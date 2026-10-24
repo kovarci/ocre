@@ -31,6 +31,7 @@
 #Include %A_LineFile%\..\Concurrents.ahk
 #Include %A_LineFile%\..\Prereglages.ahk
 #Include %A_LineFile%\..\Raccourcis.ahk
+#Include %A_LineFile%\..\Apropos.ahk
 
 class Reglages {
 
@@ -446,6 +447,10 @@ class Reglages {
                                     , () => Reglages._Exporter())
         c["importer"] := Bouton.Creer(g, 198, yBtn + 4, 62, 26, S("importer"), false
                                     , () => Reglages._Importer())
+        ;  A droite, seul : ce n'est pas un geste sur les reglages, c'est la
+        ;  fenetre ou l'on cherche la version et de quoi signaler un probleme.
+        c["apropos"] := Bouton.Creer(g, 338, yBtn + 4, 102, 26, S("apropos"), false
+                                   , () => Apropos.Ouvrir())
 
         Reglages.gui := porteur.fenetre
         Reglages.porteur := porteur

@@ -173,6 +173,23 @@ class I18n {
             "aide_prereglages", "Lecture, Film, Nuit : les trois boutons du panneau du clic droit. "
                             . "Chacun pose l'intensité et la luminosité d'un coup.",
 
+            "apropos",        "À propos…",
+            "version_n",      "Version {1}",
+            "apropos_texte",  "Filtre de lumière chaude pour Windows 11, piloté au clavier. "
+                            . "Logiciel libre, sous licence MIT. Ocre n'ouvre lui-même aucune "
+                            . "connexion réseau : les liens ci-dessous ouvrent votre navigateur.",
+            "liens_titre",    "LIENS",
+            "lien_depot",     "Projet sur GitHub",
+            "lien_versions",  "Notes de version",
+            "assistance_titre", "ASSISTANCE",
+            "copier_diag",    "Copier le diagnostic",
+            "diag_copie",     "Copié : collez-le dans votre signalement.",
+            "dossier_reglages", "Dossier des réglages",
+            "licences_titre", "LICENCES",
+            "licences_texte", "Ocre : licence MIT. Embarqués dans l'exécutable : AutoHotkey v2, "
+                            . "l'interpréteur (GNU GPL v2) · Inter, la police de la pastille "
+                            . "(SIL OFL 1.1) · GeoNames, la table des villes (CC BY 4.0).",
+
             "rappel",         "Rappel 20-20-20 : toutes les 20 min, regarder au loin 20 s"),
         "en", Map(
             "sous_titre",     "Warm light filter",
@@ -333,6 +350,23 @@ class I18n {
             "prereglages_titre", "Presets",
             "aide_prereglages", "Reading, Film, Night: the three buttons of the right-click panel. "
                             . "Each sets intensity and brightness at once.",
+
+            "apropos",        "About…",
+            "version_n",      "Version {1}",
+            "apropos_texte",  "Warm-light screen filter for Windows 11, driven from the keyboard. "
+                            . "Free software under the MIT licence. Ocre itself opens no network "
+                            . "connection: the links below open your browser.",
+            "liens_titre",    "LINKS",
+            "lien_depot",     "Project on GitHub",
+            "lien_versions",  "Release notes",
+            "assistance_titre", "SUPPORT",
+            "copier_diag",    "Copy diagnostic",
+            "diag_copie",     "Copied: paste it into your report.",
+            "dossier_reglages", "Settings folder",
+            "licences_titre", "LICENCES",
+            "licences_texte", "Ocre: MIT licence. Embedded in the executable: AutoHotkey v2, "
+                            . "the interpreter (GNU GPL v2) · Inter, the badge font "
+                            . "(SIL OFL 1.1) · GeoNames, the city table (CC BY 4.0).",
 
             "rappel",         "20-20-20 reminder: every 20 min, look far away for 20 s"))
 
