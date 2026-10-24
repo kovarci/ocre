@@ -303,6 +303,11 @@ Loop 5 {
 }
 if (d1 = -3 || d2 = -3) {
     Dire("  (pas de duplication DXGI ici : Capture n'est pas essayee)")
+} else if (d2 = -2) {
+    ;  Un ecran immobile -- une machine sans personne devant, un executeur de
+    ;  CI -- ne livre jamais de seconde image : rien n'a change, rien a mesurer.
+    Capture.Oublier()
+    Dire("  (ecran immobile : la duplication DXGI n'a livre aucune image, Capture n'est pas essayee)")
 } else {
     Verifier("la duplication DXGI donne une luminance", d2 >= 0 && d2 <= 1, d2)
     ;  Les deux ne sont pas la meme moyenne -- lineaire puis encodee d'un
@@ -742,6 +747,16 @@ if (DllCall("AttachConsole", "uint", -1)) {
 
     ;  /export ecrit la VRAIE configuration dans un fichier temporaire, et
     ;  /import la reprend telle quelle : rien ne change pour l'utilisateur.
+    ;  Sur une machine neuve -- un executeur de CI -- il n'y a pas encore de
+    ;  fichier : l'export serait vide, et /import refuse, a juste titre, un
+    ;  fichier sans rien dedans. On en pose un le temps de l'essai.
+    reel := A_AppData . "\Ocre\ocre.ini"
+    poseIci := false
+    if (!FileExist(reel)) {
+        try DirCreate(A_AppData . "\Ocre")
+        IniWrite("0", reel, "ocre", "intensite")
+        poseIci := true
+    }
     Verifier("/export sans fichier rend 2", Code("/export") = 2)
     Verifier("/import sans fichier rend 2", Code("/import") = 2)
     Verifier("/import d'un fichier absent rend 2", Code('/import "' . A_Temp . '\ocre-nulle-part.ini"') = 2)
@@ -750,6 +765,10 @@ if (DllCall("AttachConsole", "uint", -1)) {
     Verifier("/export ecrit le fichier et rend 0", Code('/export "' . sauve . '"') = 0 && FileExist(sauve))
     Verifier("/import du meme fichier rend 0", Code('/import "' . sauve . '"') = 0)
     try FileDelete(sauve)
+    if (poseIci) {
+        try FileDelete(reel)
+        try DirDelete(A_AppData . "\Ocre")     ; sans effet s'il n'est pas vide
+    }
 } else {
     Dire("  (pas de console : la ligne de commande n'est pas essayee)")
 }
