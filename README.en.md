@@ -553,6 +553,29 @@ Ocre-<version>-setup.exe /VERYSILENT /TASKS="demarrage,filtres"
 Until the installer is signed, Windows shows "Windows protected your PC": see
 "SmartScreen" below.
 
+#### Rolling back
+
+Before touching Windows, the installer records what it is about to change, in
+`C:\Program Files\Ocre\sauvegarde\`:
+
+- `avant-installation.reg`: the original registry values
+  (`GdiIcmGammaRange`, `HotkeyEnabled`). Double-click it -- or use the Start
+  menu shortcut "Ocre - restore the original Windows settings" -- and Windows
+  is back to how it was, Ocre installed or not. A value that did not exist
+  reads `"name"=-`: it is deleted.
+- `avant-installation.ini`: the same, for the uninstaller.
+
+It works value by value, never a whole key: exporting a key would also
+overwrite what you have changed since. The recorded state is the one from
+**before the first install**; an update does not rewrite it.
+
+Uninstalling gives back only what the install really changed -- if
+`GdiIcmGammaRange` was already 256 it leaves it alone -- and only if the value
+is still the one the install set: what another tool has set since is not
+Ocre's to touch. The `sauvegarde\` folder goes with the rest.
+`tools/test-installateur.ps1` plays all of it (install, update, uninstall,
+four starting states) without elevation, on dummy keys.
+
 ### Without the installer
 
 Two ways: the `Ocre-<version>.zip` archive from the GitHub Releases -- the
@@ -1204,6 +1227,7 @@ process, fixes everything ([`lib/Compositeur.ahk`](lib/Compositeur.ahk)).
 | [`tools/test-perf.ahk`](tools/test-perf.ahk) | is startup fast, is rest silent? |
 | [`tools/release.ps1`](tools/release.ps1) | builds, tests, checks the resources, packs it all into `dist\Ocre-<version>.zip` and builds the installer |
 | [`tools/installer.ps1`](tools/installer.ps1) | builds `dist\Ocre-<version>-setup.exe` with Inno Setup (fetched by winget if missing) |
+| [`tools/test-installateur.ps1`](tools/test-installateur.ps1) | plays the test installer -- install, update, roll back -- without elevation, on dummy keys |
 | [`installer/`](installer/) | the installer's Inno Setup script, and `utilisateur.ps1`, what it sets in the user's own account (startup task, `Win+Ctrl+C`) |
 | [`tools/sign.ps1`](tools/sign.ps1) | signs `Ocre.exe`, when there is a certificate |
 | [`tools/test-soleil.ahk`](tools/test-soleil.ahk) | checks the solar calculation against another implementation |

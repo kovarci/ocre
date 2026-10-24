@@ -403,7 +403,7 @@ class Demarrage {
             s.DisallowStartIfOnBatteries := false
             s.StopIfGoingOnBatteries := false
             s.ExecutionTimeLimit := "PT0S"           ; jamais arrete pour duree
-            s.MultipleInstancesPolicy := 2           ; TASK_INSTANCES_IGNORE_NEW
+            s.MultipleInstances := 2                 ; TASK_INSTANCES_IGNORE_NEW
             s.StartWhenAvailable := true
             s.IdleSettings.StopOnIdleEnd := false
 

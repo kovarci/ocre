@@ -89,6 +89,12 @@ Ok "$zip ($([math]::Round((Get-Item $zip).Length/1MB,2)) Mo)"
 #  Le .exe avec assistant (installer\Ocre.iss), pour qui ne veut ni PowerShell
 #  ni dossier decompresse. C'est lui qu'on met en avant sur la page de la release.
 Write-Host "`n[5/5] Installateur"
+if (-not $SansTests) {
+    #  Sans elevation, sur des cles factices : voir tools\test-installateur.ps1.
+    & powershell.exe -NoProfile -ExecutionPolicy Bypass -File (Join-Path $PSScriptRoot 'test-installateur.ps1') | Out-Null
+    if ($LASTEXITCODE -ne 0) { Fail "$LASTEXITCODE verification(s) de l'installateur en echec : pas de release"; exit 1 }
+    Ok "installation, mise a jour et retour arriere jouent"
+}
 & powershell.exe -NoProfile -ExecutionPolicy Bypass -File (Join-Path $PSScriptRoot 'installer.ps1') | Out-Null
 $setup = Join-Path $Dist "Ocre-$Version-setup.exe"
 if (-not (Test-Path $setup)) { Fail "l'installateur n'a pas ete construit (lancez tools\installer.ps1 pour voir pourquoi)"; exit 1 }

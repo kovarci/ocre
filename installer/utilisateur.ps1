@@ -2,25 +2,23 @@
     utilisateur.ps1 -- ce que l'installateur pose DANS LE COMPTE de l'utilisateur.
 
     L'installateur s'execute eleve (il ecrit dans Program Files et dans HKLM).
-    Ce qui appartient a l'utilisateur -- sa tache de demarrage, ses filtres de
-    couleur -- ne doit pas etre ecrit par le jeton eleve : si un autre compte a
-    donne l'autorisation, ce serait son profil et son nom qui s'y retrouveraient.
-    Inno Setup lance donc ce script avec le drapeau runasoriginaluser, qui
-    rend le jeton de celui qui a double-clique.
+    La tache de demarrage porte l'identite de celui qui ouvre la session : si un
+    autre compte a donne l'autorisation, ce serait son nom, pas le bon, qu'elle
+    garderait. Inno Setup lance donc ce script avec le drapeau runasoriginaluser,
+    qui rend le jeton de celui qui a double-clique.
 
-      -Demarrage        tache planifiee a l'ouverture de session. Meme tache que
-                        celle de Demarrage.CreerTache (lib\Config.ahk) : sans
-                        elevation, et que la batterie n'interrompt ni ne retarde.
-      -FiltresCouleur   desactive Win+Ctrl+C, le raccourci des filtres de couleur
-                        de Windows, qui entre en collision avec Ctrl+F7 sur
-                        certains portables (voir install.ps1).
+      -Demarrage   tache planifiee a l'ouverture de session. Meme tache que celle
+                   de Demarrage.CreerTache (lib\Config.ahk) : sans elevation, et
+                   que la batterie n'interrompt ni ne retarde.
+      -Tache       son nom (Ocre ; l'installateur d'essai en prend un autre).
+      -Exe         ce qu'elle lance.
 #>
 
 [CmdletBinding()]
 param(
     [string]$Exe,
-    [switch]$Demarrage,
-    [switch]$FiltresCouleur
+    [string]$Tache = 'Ocre',
+    [switch]$Demarrage
 )
 
 $ErrorActionPreference = 'Stop'
@@ -35,7 +33,7 @@ if ($Demarrage) {
     $s.DisallowStartIfOnBatteries = $false
     $s.StopIfGoingOnBatteries     = $false
     $s.ExecutionTimeLimit         = 'PT0S'          # jamais arrete pour duree
-    $s.MultipleInstancesPolicy    = 2               # TASK_INSTANCES_IGNORE_NEW
+    $s.MultipleInstances          = 2               # TASK_INSTANCES_IGNORE_NEW
     $s.StartWhenAvailable         = $true
     $s.IdleSettings.StopOnIdleEnd = $false
 
@@ -49,11 +47,5 @@ if ($Demarrage) {
     $def.Principal.RunLevel  = 0                    # TASK_RUNLEVEL_LUA : sans elevation
 
     # TASK_CREATE_OR_UPDATE, TASK_LOGON_INTERACTIVE_TOKEN
-    $service.GetFolder('\').RegisterTaskDefinition('Ocre', $def, 6, $null, $null, 3) | Out-Null
-}
-
-if ($FiltresCouleur) {
-    $Cf = 'HKCU:\Software\Microsoft\ColorFiltering'
-    New-Item -Path $Cf -Force | Out-Null
-    New-ItemProperty -Path $Cf -Name HotkeyEnabled -Value 0 -PropertyType DWord -Force | Out-Null
+    $service.GetFolder('\').RegisterTaskDefinition($Tache, $def, 6, $null, $null, 3) | Out-Null
 }

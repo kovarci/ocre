@@ -630,6 +630,35 @@ Habitudes.horloge := 0
 Habitudes.presence := 0
 Habitudes.actif := false
 
+;--------------------------------------------------------------- demarrage ----
+;  CreerTache est un try qui avale tout : une propriete mal nommee
+;  (MultipleInstancesPolicy, le nom de l'element XML, au lieu de
+;  MultipleInstances, celui de l'interface) la faisait echouer en silence, et
+;  Definir se rabattait sur le raccourci -- celui des 46 secondes. On l'essaie
+;  donc pour de bon, sous un autre nom de tache que la vraie, et l'on relit ce
+;  que le planificateur a retenu.
+Demarrage.TACHE := "OcreEssai"
+Demarrage.SupprimerTache()
+try {
+    Verifier("la tache d'essai n'existe pas au depart", !Demarrage.TacheExiste())
+    Verifier("CreerTache enregistre la tache", Demarrage.CreerTache())
+    service := ComObject("Schedule.Service")
+    service.Connect()
+    def := service.GetFolder("\").GetTask(Demarrage.TACHE).Definition
+    s := def.Settings
+    Verifier("la tache ne depend pas de la batterie"
+           , !s.StopIfGoingOnBatteries && !s.DisallowStartIfOnBatteries)
+    Verifier("la tache n'a pas de limite de duree", s.ExecutionTimeLimit = "PT0S", s.ExecutionTimeLimit)
+    Verifier("la tache ignore un second lancement", s.MultipleInstances = 2, s.MultipleInstances)
+    Verifier("la tache tourne sans elevation", def.Principal.RunLevel = 0, def.Principal.RunLevel)
+} catch as e {
+    Verifier("la tache d'essai se cree et se relit", false, e.Message)
+} finally {
+    Demarrage.SupprimerTache()
+}
+Verifier("la tache d'essai est retiree", !Demarrage.TacheExiste())
+Demarrage.TACHE := "Ocre"
+
 ;------------------------------------------------------------------ icone ----
 h1 := Blob.Icone(50, 32)
 h2 := Blob.Icone(50, 32, 1.0, true)

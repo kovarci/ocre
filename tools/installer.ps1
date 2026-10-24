@@ -13,12 +13,19 @@
     La version est lue dans la directive SetVersion de Ocre.ahk. L'adresse du
     depot, si -RepoUrl n'est pas donne, est celle du remote "origin".
 
-    Usage : powershell -ExecutionPolicy Bypass -File .\tools\installer.ps1 [-RepoUrl https://github.com/qui/ocre]
+    -Essai construit la VARIANTE D'ESSAI (voir l'en-tete de installer\Ocre.iss) :
+    un OcreEssai-<version>-setup.exe dans %TEMP%\ocre-essai, qui ne touche ni
+    HKLM, ni la vraie tache, ni le vrai Ocre, et ne demande pas l'elevation.
+    C'est celui que tools\test-installateur.ps1 joue ; il ne se signe pas et
+    ne se publie pas.
+
+    Usage : powershell -ExecutionPolicy Bypass -File .\tools\installer.ps1 [-RepoUrl https://github.com/qui/ocre] [-Essai]
 #>
 
 [CmdletBinding()]
 param(
-    [string]$RepoUrl
+    [string]$RepoUrl,
+    [switch]$Essai
 )
 
 $ErrorActionPreference = 'Stop'
@@ -39,11 +46,15 @@ if (-not (Test-Path (Join-Path $Root 'Ocre.exe'))) { Fail "Ocre.exe manque : ins
 if (-not (Test-Path (Join-Path $Root 'Ocre.ico'))) { Fail "Ocre.ico manque : install.ps1 -Build le genere"; exit 1 }
 
 #------------------------------------------------------------------ depot -----
-#  Pas de depot, pas d'adresse : l'installateur se construit tout aussi bien
-#  sans (git ecrit sur stderr, que 'Stop' ferait passer pour une erreur).
+#  Pas de depot, ou pas de remote : pas d'adresse, et l'installateur se
+#  construit tout aussi bien. git ecrit sa plainte sur stderr, que 'Stop'
+#  ferait passer pour une erreur : on le laisse parler le temps de la question.
 if (-not $RepoUrl -and (Test-Path (Join-Path $Root '.git')) -and (Get-Command git -ErrorAction SilentlyContinue)) {
+    $ea = $ErrorActionPreference; $ErrorActionPreference = 'Continue'
     $o = & git -C $Root remote get-url origin 2>$null
-    if ($LASTEXITCODE -eq 0 -and $o) { $RepoUrl = ($o -replace '\.git$', '').Trim() }
+    $rc = $LASTEXITCODE
+    $ErrorActionPreference = $ea
+    if ($rc -eq 0 -and $o) { $RepoUrl = ($o -replace '\.git$', '').Trim() }
 }
 
 #------------------------------------------------------------------ ISCC ------
@@ -64,15 +75,23 @@ Ok "Inno Setup : $Iscc"
 #--------------------------------------------------------------- compilation --
 $Args2 = @("/DAppVersion=$Version", '/Qp')
 if ($RepoUrl) { $Args2 += "/DRepoUrl=$RepoUrl" }
+if ($Essai) {
+    $Sortie = Join-Path $env:TEMP 'ocre-essai'
+    $Args2 += '/DESSAI', "/O$Sortie"
+    $Setup = Join-Path $Sortie "OcreEssai-$Version-setup.exe"
+} else {
+    $Setup = Join-Path $Root "dist\Ocre-$Version-setup.exe"
+}
 $Args2 += (Join-Path $Root 'installer\Ocre.iss')
 
 & $Iscc @Args2
 if ($LASTEXITCODE -ne 0) { Fail "ISCC a echoue (code $LASTEXITCODE)"; exit 1 }
 
-$Setup = Join-Path $Root "dist\Ocre-$Version-setup.exe"
 if (-not (Test-Path $Setup)) { Fail "$Setup n'a pas ete ecrit"; exit 1 }
 Ok "$Setup ($([math]::Round((Get-Item $Setup).Length/1MB,2)) Mo)"
 
 #----------------------------------------------------------------- signature --
-& powershell.exe -NoProfile -ExecutionPolicy Bypass -File (Join-Path $PSScriptRoot 'sign.ps1') -Fichier $Setup
-if ($LASTEXITCODE -eq 2) { Info "non signe : SmartScreen avertira au premier lancement (voir README, 'SmartScreen')" }
+if (-not $Essai) {
+    & powershell.exe -NoProfile -ExecutionPolicy Bypass -File (Join-Path $PSScriptRoot 'sign.ps1') -Fichier $Setup
+    if ($LASTEXITCODE -eq 2) { Info "non signe : SmartScreen avertira au premier lancement (voir README, 'SmartScreen')" }
+}

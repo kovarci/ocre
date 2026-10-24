@@ -567,6 +567,29 @@ Ocre-<version>-setup.exe /VERYSILENT /TASKS="demarrage,filtres"
 Tant que l'installateur n'est pas signe, Windows affiche « Windows a protege
 votre ordinateur » : voir « SmartScreen » plus bas.
 
+#### Retour arriere
+
+Avant de toucher a Windows, l'installateur note ce qu'il va changer, dans
+`C:\Program Files\Ocre\sauvegarde\` :
+
+- `avant-installation.reg` : les valeurs de registre d'origine
+  (`GdiIcmGammaRange`, `HotkeyEnabled`). Un double-clic -- ou le raccourci
+  « Ocre - restaurer les reglages Windows d'origine » du menu Demarrer -- et
+  Windows retrouve son etat d'avant, Ocre installe ou non. Une valeur qui
+  n'existait pas s'y lit `"nom"=-` : elle est supprimee.
+- `avant-installation.ini` : la meme chose, pour la desinstallation.
+
+C'est valeur par valeur, jamais une cle entiere : l'export d'une cle
+ecraserait aussi ce que vous avez change depuis. L'etat note est celui
+**d'avant la premiere installation** ; une mise a jour ne le reecrit pas.
+
+La desinstallation ne rend que ce que l'installation a vraiment change -- si
+`GdiIcmGammaRange` valait deja 256, elle n'y touche pas -- et seulement si la
+valeur est encore celle que l'installation a posee : ce qu'un autre outil a
+regle depuis n'est pas a elle. Le dossier `sauvegarde\` part avec le reste.
+`tools/test-installateur.ps1` joue tout cela (installation, mise a jour,
+retrait, quatre etats de depart) sans elevation, sur des cles factices.
+
 ### Sans installateur
 
 Deux facons : l'archive `Ocre-<version>.zip` des Releases GitHub -- l'executable,
@@ -1246,6 +1269,7 @@ processus, regle tout ([`lib/Compositeur.ahk`](lib/Compositeur.ahk)).
 | [`tools/test-perf.ahk`](tools/test-perf.ahk) | le demarrage est-il rapide, le repos silencieux ? |
 | [`tools/release.ps1`](tools/release.ps1) | construit, teste, verifie les ressources, range le tout dans `dist\Ocre-<version>.zip` et construit l'installateur |
 | [`tools/installer.ps1`](tools/installer.ps1) | construit `dist\Ocre-<version>-setup.exe` avec Inno Setup (recupere par winget au besoin) |
+| [`tools/test-installateur.ps1`](tools/test-installateur.ps1) | joue l'installateur d'essai -- installation, mise a jour, retour arriere -- sans elevation, sur des cles factices |
 | [`installer/`](installer/) | le script Inno Setup de l'installateur, et `utilisateur.ps1`, ce qu'il pose dans le compte de l'utilisateur (tache de demarrage, `Win+Ctrl+C`) |
 | [`tools/sign.ps1`](tools/sign.ps1) | signe `Ocre.exe`, quand il y a un certificat |
 | [`tools/test-soleil.ahk`](tools/test-soleil.ahk) | verifie le calcul solaire contre une autre implementation |
