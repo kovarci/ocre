@@ -26,7 +26,10 @@
 class Rappel {
 
     static CYCLE := 3000           ; une inspiration et une expiration
-    static CYCLES := 7             ; sept respirations : vingt et une secondes
+    static CYCLES := 8             ; huit respirations : vingt-quatre secondes
+    static FONDU := 2000           ; l'orange vire au vert en deux secondes...
+    static MAINTIEN := 20000       ; ...reste vert vingt secondes...
+                                   ; ...et revient en deux : 24 s en tout, pas 20 pile
     static PAS := 60               ; entre deux images
     static MINI := 0.65            ; la tache descend a 65 % de sa taille...
     static MAXI := 1.12            ; ...et monte jusqu'a toucher les bords
@@ -38,10 +41,13 @@ class Rappel {
     static debut := 0
     static respirer := 0           ; (echelle) => ..., -1 pour rendre l'icone
     static permis := 0             ; () => le rappel a-t-il lieu d'etre ?
+    static verdir := 0             ; (taux 0..1) => ... la teinte vire au vert
+    static taux := 0.0             ; le dernier taux envoye
 
-    static Init(respirer, permis := 0) {
+    static Init(respirer, permis := 0, verdir := 0) {
         Rappel.respirer := respirer
         Rappel.permis := permis
+        Rappel.verdir := verdir
         Rappel.signature := ""
         Rappel.Relire()
     }
@@ -126,6 +132,30 @@ class Rappel {
         echelle := centre + demi * Sin(phase)
         if (Rappel.respirer)
             try (Rappel.respirer)(echelle)
+        Rappel._Verdir(Rappel._Taux(t))
+    }
+
+    ;  Le taux de vert au temps t : une montee en cosinus (douce aux deux
+    ;  bouts, sans a-coup), le plateau, puis la descente symetrique.
+    static _Taux(t) {
+        total := Rappel.CYCLES * Rappel.CYCLE
+        if (t < Rappel.FONDU)
+            x := t / Rappel.FONDU
+        else if (t > total - Rappel.FONDU)
+            x := (total - t) / Rappel.FONDU
+        else
+            x := 1.0
+        x := Max(0.0, Min(1.0, x))
+        return (1 - Cos(3.14159265358979 * x)) / 2
+    }
+
+    ;  N'envoie que ce qui change : sur le plateau, rien a reposer.
+    static _Verdir(taux) {
+        if (Abs(taux - Rappel.taux) < 0.004 && !(taux = 0 && Rappel.taux != 0))
+            return
+        Rappel.taux := taux
+        if (Rappel.verdir)
+            try (Rappel.verdir)(taux)
     }
 
     ;  Rend l'icone normale -- seulement si une respiration etait en cours :
@@ -136,6 +166,7 @@ class Rappel {
             return
         SetTimer(Rappel.tac, 0)
         Rappel.tac := 0
+        Rappel._Verdir(0.0)
         if (Rappel.respirer)
             try (Rappel.respirer)(-1)
     }

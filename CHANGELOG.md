@@ -41,6 +41,9 @@ All notable changes to Ocre are listed here. The format follows
 
 ### Changed
 
+- **The 20-20-20 reminder turns the filter green.** When the reminder fires, the filter fades
+  from orange to green over 2 s, stays green for 20 s, and fades back over 2 s: 24 s in all,
+  never an instant switch. The tray icon still breathes for the same 24 s.
 - `README.md` is now in English, the default on GitHub; the French one is `README.fr.md`.
   The archive carries `README.fr.md` instead of `README.en.md`.
 

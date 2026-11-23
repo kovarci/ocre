@@ -1212,6 +1212,12 @@ RemonterBatterie(duree) {
 ;  La respiration du rappel des 20-20-20 : la tache de la zone de
 ;  notification retrecit et regrossit doucement pendant vingt secondes, a
 ;  la couleur du filtre. -1 rend l'icone normale.
+;  Le rappel 20-20-20 fait virer le filtre de l'orange au vert, puis le rend.
+VerdirRappel(taux) {
+    Filtre.vert := taux
+    Filtre.Appliquer()
+}
+
 RespirerTray(echelle) {
     if (echelle < 0) {
         RafraichirTray()
@@ -1517,7 +1523,7 @@ Horaire.Init((v) => Appliquer(v, false, false), () => Niveau())
 
 ;  Le rappel des 20-20-20, s'il est demande -- et jamais filtre coupe : c'est
 ;  le geste qu'on fait pour montrer son ecran a quelqu'un.
-Rappel.Init(RespirerTray, () => !Filtre.Coupe())
+Rappel.Init(RespirerTray, () => !Filtre.Coupe(), VerdirRappel)
 
 ;  L'assombrissement a l'inactivite, s'il est demande.
 Inactif.Init(AssombrirInactif, EclaircirInactif, TenirInactif)

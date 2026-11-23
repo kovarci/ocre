@@ -43,6 +43,10 @@ class Filtre {
     ;  ligne du panneau du clic droit y mene.
     static chambre := false
 
+    ;  Le virage au vert du rappel 20-20-20, de 0 (orange) a 1 (vert). Un etat
+    ;  de session, jamais ecrit : c'est Rappel qui le pilote.
+    static vert := 0.0
+
     ;--------------------------------------------------------------------------
     ;  Relit les reglages persistes.
     ;
@@ -210,7 +214,7 @@ class Filtre {
             if (parCompositeur) {
                 Gamma.Neutre(e.hdc)
                 ok := true
-            } else if (Gamma.Poser(e.hdc, Gamma.Couleur(v.i, part.gamma), noir)) {
+            } else if (Gamma.Poser(e.hdc, Gamma.Couleur(v.i, part.gamma, Filtre.vert), noir)) {
                 ok := true
             }
         }
@@ -221,7 +225,7 @@ class Filtre {
             ref := Filtre.separes ? Ecrans.Actif() : Ecrans.Principal()
             v := Filtre.Lire(ref)
             part := Retro.Repartir(ref, v.l, Gamma.PLANCHER_LUM)
-            c := Gamma.Couleur(v.i, part.gamma)
+            c := Gamma.Couleur(v.i, part.gamma, Filtre.vert)
             m := Compositeur.Teinte(c.r, c.g, c.b
                                   , Hdr.Actif() ? Compositeur.EXPOSANT_HDR : 1.0)
             if (gris)
@@ -329,7 +333,7 @@ class Filtre {
                 continue
 
             part := Retro.Repartir(e, v.l, Gamma.PLANCHER_LUM)
-            attendu := Gamma.BleuAttendu(Gamma.Couleur(v.i, part.gamma))
+            attendu := Gamma.BleuAttendu(Gamma.Couleur(v.i, part.gamma, Filtre.vert))
             if (Abs(pose - attendu) > 256)
                 return true
         }

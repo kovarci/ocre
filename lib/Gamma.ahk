@@ -132,8 +132,18 @@ class Gamma {
     ;  Les multiplicateurs d'un couple (intensite, facteur de luminosite). Le
     ;  facteur multiplie les trois canaux a l'identique, donc sans deplacer la
     ;  teinte.
-    static Couleur(p, facteur := 1.0) {
+    ;  vert, entre 0 et 1, fait virer la teinte de l'orange au vert : c'est le
+    ;  rappel du 20-20-20 (voir Rappel.ahk). A 1, le rouge tombe, le vert
+    ;  monte presque au plein et le bleu baisse de moitie ; entre les deux,
+    ;  chaque canal glisse en droite ligne, donc la transition est continue.
+    static Couleur(p, facteur := 1.0, vert := 0.0) {
         c := Gamma.Multiplicateurs(p)
+        if (vert > 0) {
+            t := Min(1.0, vert)
+            c := { r: c.r + (c.r * 0.35 - c.r) * t
+                 , g: c.g + (Max(c.g, 0.90) - c.g) * t
+                 , b: c.b + (c.b * 0.50 - c.b) * t }
+        }
         return { r: c.r * facteur, g: c.g * facteur, b: c.b * facteur }
     }
 
