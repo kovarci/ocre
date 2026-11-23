@@ -6,6 +6,8 @@ All notable changes to Ocre are listed here. The format follows
 
 ## [Unreleased]
 
+## [1.3.1] - 2026-11-23
+
 ### Added
 
 - **An installer**, `Ocre-<version>-setup.exe` (Inno Setup): a wizard, a Start menu entry, an
@@ -76,5 +78,6 @@ First public release.
   a portable mode, French and English.
 - `install.ps1`, and a portable `Ocre-1.3.0.zip`.
 
-[Unreleased]: https://github.com/kovarci/ocre/compare/v1.3.0...HEAD
+[Unreleased]: https://github.com/kovarci/ocre/compare/v1.3.1...HEAD
+[1.3.1]: https://github.com/kovarci/ocre/compare/v1.3.0...v1.3.1
 [1.3.0]: https://github.com/kovarci/ocre/releases/tag/v1.3.0
